@@ -1,0 +1,123 @@
+
+> complykort-backend@1.0.0 dev:real
+> tsx watch src/server-real.ts
+
+🚀 ComplykOrt API server running on 0.0.0.0:3001
+📍 External access: http://95.217.190.154:3001
+🎯 Environment: development
+💾 Database: Connected to PostgreSQL
+🔑 Demo credentials: admin@acme.example.com / demo123!
+User logged in: admin@acme.example.com
+10:17:52 AM [tsx] change in ./src/server-real.ts Restarting...
+cnode:events:495
+      throw er; // Unhandled 'error' event
+      ^
+
+Error: listen EADDRINUSE: address already in use 0.0.0.0:3001
+    at __node_internal_captureLargerStackTrace (node:internal/errors:496:5)
+    at __node_internal_uvExceptionWithHostPort (node:internal/errors:593:12)
+    at Server.setupListenHandle [as _listen2] (node:net:1817:16)
+    at listenInCluster (node:net:1865:12)
+    at doListen (node:net:2014:7)
+    at process.processTicksAndRejections (node:internal/process/task_queues:83:21)
+Emitted 'error' event on Server instance at:
+    at emitErrorNT (node:net:1844:8)
+    at process.processTicksAndRejections (node:internal/process/task_queues:82:21) {
+  code: 'EADDRINUSE',
+  errno: -98,
+  syscall: 'listen',
+  address: '0.0.0.0',
+  port: 3001
+}
+
+Node.js v18.20.8
+10:26:58 AM [tsx] change in ./src/server-real.ts Rerunning...
+cnode:internal/process/esm_loader:40
+      internalBinding('errors').triggerUncaughtException(
+                                ^
+
+Error: Transform failed with 1 error:
+/root/complykort/backend/src/server-real.ts:553:45: ERROR: Unexpected ","
+    at failureErrorWithLog (/root/complykort/backend/node_modules/esbuild/lib/main.js:1467:15)
+    at /root/complykort/backend/node_modules/esbuild/lib/main.js:736:50
+    at responseCallbacks.<computed> (/root/complykort/backend/node_modules/esbuild/lib/main.js:603:9)
+    at handleIncomingPacket (/root/complykort/backend/node_modules/esbuild/lib/main.js:658:12)
+    at Socket.readFromStdout (/root/complykort/backend/node_modules/esbuild/lib/main.js:581:7)
+    at Socket.emit (node:events:517:28)
+    at addChunk (node:internal/streams/readable:368:12)
+    at readableAddChunk (node:internal/streams/readable:341:9)
+    at Readable.push (node:internal/streams/readable:278:10)
+    at Pipe.onStreamRead (node:internal/stream_base_commons:190:23) {
+  name: 'TransformError'
+}
+
+Node.js v18.20.8
+10:27:32 AM [tsx] change in ./src/server-real.ts Rerunning...
+cnode:internal/process/esm_loader:40
+      internalBinding('errors').triggerUncaughtException(
+                                ^
+
+Error: Transform failed with 1 error:
+/root/complykort/backend/src/server-real.ts:551:6: ERROR: Expected "}" but found "description"
+    at failureErrorWithLog (/root/complykort/backend/node_modules/esbuild/lib/main.js:1467:15)
+    at /root/complykort/backend/node_modules/esbuild/lib/main.js:736:50
+    at responseCallbacks.<computed> (/root/complykort/backend/node_modules/esbuild/lib/main.js:603:9)
+    at handleIncomingPacket (/root/complykort/backend/node_modules/esbuild/lib/main.js:658:12)
+    at Socket.readFromStdout (/root/complykort/backend/node_modules/esbuild/lib/main.js:581:7)
+    at Socket.emit (node:events:517:28)
+    at addChunk (node:internal/streams/readable:368:12)
+    at readableAddChunk (node:internal/streams/readable:341:9)
+    at Readable.push (node:internal/streams/readable:278:10)
+    at Pipe.onStreamRead (node:internal/stream_base_commons:190:23) {
+  name: 'TransformError'
+}
+
+Node.js v18.20.8
+10:28:01 AM [tsx] change in ./src/server-real.ts Rerunning...
+cnode:events:495
+      throw er; // Unhandled 'error' event
+      ^
+
+Error: listen EADDRINUSE: address already in use 0.0.0.0:3001
+    at __node_internal_captureLargerStackTrace (node:internal/errors:496:5)
+    at __node_internal_uvExceptionWithHostPort (node:internal/errors:593:12)
+    at Server.setupListenHandle [as _listen2] (node:net:1817:16)
+    at listenInCluster (node:net:1865:12)
+    at doListen (node:net:2014:7)
+    at process.processTicksAndRejections (node:internal/process/task_queues:83:21)
+Emitted 'error' event on Server instance at:
+    at emitErrorNT (node:net:1844:8)
+    at process.processTicksAndRejections (node:internal/process/task_queues:82:21) {
+  code: 'EADDRINUSE',
+  errno: -98,
+  syscall: 'listen',
+  address: '0.0.0.0',
+  port: 3001
+}
+
+Node.js v18.20.8
+10:28:41 AM [tsx] change in ./src/server-real.ts Rerunning...
+c🚀 ComplykOrt API server running on 0.0.0.0:3001
+📍 External access: http://95.217.190.154:3001
+🎯 Environment: development
+💾 Database: Connected to PostgreSQL
+🔑 Demo credentials: admin@acme.example.com / demo123!
+Unhandled error: SyntaxError: Unexpected token t in JSON at position 0
+    at JSON.parse (<anonymous>)
+    at createStrictSyntaxError (/root/complykort/backend/node_modules/body-parser/lib/types/json.js:169:10)
+    at parse (/root/complykort/backend/node_modules/body-parser/lib/types/json.js:86:15)
+    at /root/complykort/backend/node_modules/body-parser/lib/read.js:128:18
+    at AsyncResource.runInAsyncScope (node:async_hooks:203:9)
+    at invokeCallback (/root/complykort/backend/node_modules/raw-body/index.js:238:16)
+    at done (/root/complykort/backend/node_modules/raw-body/index.js:227:7)
+    at IncomingMessage.onEnd (/root/complykort/backend/node_modules/raw-body/index.js:287:7)
+    at IncomingMessage.emit (node:events:517:28)
+    at endReadableNT (node:internal/streams/readable:1400:12) {
+  expose: true,
+  statusCode: 400,
+  status: 400,
+  body: 'title:Demo',
+  type: 'entity.parse.failed'
+}
+User logged in: admin@acme.example.com
+User logged in: admin@acme.example.com

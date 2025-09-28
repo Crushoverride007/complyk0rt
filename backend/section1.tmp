@@ -1,0 +1,154 @@
+              {
+                id: '1.1',
+                number: '1.1',
+                label: 'Contact Information',
+                fields: [
+                  {
+                    id: 'assessedEntity',
+                    type: 'form-table',
+                    label: 'Assessed Entity',
+                    rows: [
+                      { id: 'companyName', type: 'text', label: 'Company name' },
+                      { id: 'dba', type: 'text', label: 'DBA (doing business as)' },
+                      { id: 'mailingAddress', type: 'textarea', label: 'Mailing address' },
+                      { id: 'website', type: 'text', label: 'Company main website' },
+                      { id: 'contactName', type: 'text', label: 'Contact name' },
+                      { id: 'contactTitle', type: 'text', label: 'Contact title' },
+                      { id: 'contactPhone', type: 'text', label: 'Contact phone number' },
+                      { id: 'contactEmail', type: 'text', label: 'Contact e-mail address' }
+                    ]
+                  },
+                  {
+                    id: 'isas',
+                    type: 'table-list',
+                    label: 'Assessed Entity Internal Security Assessors (ISAs)',
+                    minRows: 1,
+                    columns: [
+                      { id: 'isaName', label: 'ISA name' }
+                    ]
+                  },
+                  {
+                    id: 'qsaCompany',
+                    type: 'form-table',
+                    label: 'Qualified Security Assessor Company',
+                    rows: [
+                      { id: 'qsaCompanyName', type: 'text', label: 'Company name' },
+                      { id: 'qsaMailingAddress', type: 'textarea', label: 'Mailing address' },
+                      { id: 'qsaWebsite', type: 'text', label: 'Company website' }
+                    ]
+                  },
+                  {
+                    id: 'leadQsa',
+                    type: 'form-table',
+                    label: 'Lead Qualified Security Assessor',
+                    rows: [
+                      { id: 'leadAssessorName', type: 'text', label: 'Lead Assessor name' },
+                      { id: 'assessorPhone', type: 'text', label: 'Assessor phone number' },
+                      { id: 'assessorEmail', type: 'text', label: 'Assessor e-mail address' },
+                      { id: 'assessorCertificate', type: 'text', label: 'Assessor certificate number' }
+                    ]
+                  },
+                  {
+                    id: 'associateQSAs',
+                    type: 'table-list',
+                    label: 'Associate QSAs involved (if none, mark Not Applicable)',
+                    minRows: 1,
+                    columns: [
+                      { id: 'associateQsaName', label: 'Associate QSA name' },
+                      { id: 'associateQsaMentor', label: 'Associate QSA mentor name' }
+                    ]
+                  },
+                  {
+                    id: 'otherAssessors',
+                    type: 'table-list',
+                    label: 'Other assessors involved (if any)',
+                    minRows: 1,
+                    columns: [
+                      { id: 'assessorName', label: 'Assessor name' },
+                      { id: 'assessorCertificateNumber', label: 'Assessor certificate number' }
+                    ]
+                  },
+                  {
+                    id: 'qaReviewer',
+                    type: 'form-table',
+                    label: 'Assessor Quality Assurance (QA) Primary Reviewer for this report',
+                    rows: [
+                      { id: 'qaReviewerName', type: 'text', label: 'QA reviewer name' },
+                      { id: 'qaReviewerPhone', type: 'text', label: 'QA reviewer phone number' },
+                      { id: 'qaReviewerEmail', type: 'text', label: 'QA reviewer e-mail address' },
+                      { id: 'qaReviewerCredential', type: 'text', label: 'QA reviewer PCI credentials/certificate number' }
+                    ]
+                  }
+                ]
+              },
+              {
+                id: '1.2',
+                number: '1.2',
+                label: 'Date and Timeframe of Assessment',
+                fields: [
+                  { id:'dateOfReport', type:'date', label:'Date of Report' },
+                  { id:'dateAssessmentBegan', type:'date', label:'Date assessment began' },
+                  { id:'dateAssessmentEnded', type:'date', label:'Date assessment ended' },
+                  { id:'onsiteDates', type:'text', label:'Identify the date(s) spent onsite at the assessed entity' }
+                ]
+              },
+              {
+                id: '1.3',
+                number: '1.3',
+                label: 'Remote Assessment Activities',
+                fields: [
+                  { id:'remoteTestingExtent', type:'radio', label:'To what extent were remote testing methods used for this assessment?', options:['All testing was performed onsite','A combination of onsite and remote testing methods was used','All testing was performed remotely'] },
+                  { id:'remoteTestingReason', type:'textarea', label:'If remote testing was used for any part of the assessment, briefly describe why onsite testing was not feasible or practical.' }
+                ]
+              },
+              {
+                id: '1.4',
+                number: '1.4',
+                label: 'Additional Services Provided by QSA Company',
+                fields: [
+                  { id:'providedConsultationForCustomizedApproach', type:'radio', label:'Indicate whether the QSA Company provided any consultation on the development or implementation of controls used for the Customized Approach.', options:['Yes','No'] },
+                  { id:'consultationDescription', type:'textarea', label:'If "Yes," describe the nature of the consultation.' },
+                  { id:'discloseProductsServices', type:'textarea', label:'Disclose all products or services provided to the assessed entity by the QSA Company that are not listed above and that were reviewed during this assessment or could reasonably be viewed to affect independence of assessment.' },
+                  { id:'independenceMitigations', type:'textarea', label:'Describe efforts made to ensure no conflict of interest resulted from the above-mentioned products and services provided by the QSA Company.' }
+                ]
+              },
+              {
+                id: '1.5',
+                number: '1.5',
+                label: 'Use of Subcontractors',
+                fields: [
+                  { id:'subcontractorsUsed', type:'radio', label:'Indicate whether any assessment activities were subcontracted to another Assessor Company.', options:['Yes','No'] },
+                  { id:'subcontractorDetails', type:'textarea', label:'If yes, identify the Assessor Company(s) utilized during the assessment.' }
+                ]
+              },
+              {
+                id: '1.6',
+                number: '1.6',
+                label: 'Additional Information/Reporting',
+                fields: [
+                  { id:'rocConsecutiveYears', type:'number', label:'Identify the number of consecutive years (including the current year) the QSA Company has issued ROCs for this entity.' }
+                ]
+              },
+              {
+                id: '1.7',
+                number: '1.7',
+                label: 'Overall Assessment Result',
+                fields: [
+                  { id:'assessmentCompletion', type:'radio', label:'Indicate whether a full or partial assessment was completed.', options:['Full Assessment','Partial Assessment'] },
+                  { id:'overallAssessmentResult', type:'radio', label:'Overall Assessment Result (Select only one)', options:['Compliant','Non-Compliant','Compliant but with Legal Exception'] }
+                ]
+              },
+              {
+                id: '1.8',
+                number: '1.8',
+                label: 'Summary of Assessment',
+                fields: [
+                  { id:'summaryOfFindings', type:'table-list', label:'Summary of Assessment Findings and Methods', minRows: 12, columns:[
+                    { id:'requirement', label:'PCI DSS Requirement (1..12 or Appendix A1/A2/A3)' },
+                    { id:'finding', label:'Assessment Finding (In Place / Not Applicable / Not Tested / Not in Place)' },
+                    { id:'compensatingControl', label:'Compensating Control (Yes/No)' },
+                    { id:'customizedApproach', label:'Customized Approach (Yes/No)' }
+                  ] },
+                  { id:'summaryNotes', type:'textarea', label:'Notes on sub-requirements with specific results/methods (optional)' }
+                ]
+              }

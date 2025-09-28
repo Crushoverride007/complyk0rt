@@ -1,0 +1,25 @@
+   ▲ Next.js 15.5.3
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 10.2s
+   Linting and checking validity of types ...
+ ⨯ ESLint: Invalid Options: - Unknown options: useEslintrc, extensions - 'extensions' has been removed.
+   Collecting page data ...
+unhandledRejection Error: Cannot find module './611.js'
+Require stack:
+- /root/complykort/frontend/.next/server/webpack-runtime.js
+- /root/complykort/frontend/.next/server/pages/_document.js
+- /root/complykort/frontend/node_modules/next/dist/server/require.js
+- /root/complykort/frontend/node_modules/next/dist/server/load-components.js
+- /root/complykort/frontend/node_modules/next/dist/build/utils.js
+- /root/complykort/frontend/node_modules/next/dist/build/worker.js
+- /root/complykort/frontend/node_modules/next/dist/compiled/jest-worker/processChild.js
+    at __webpack_require__.f.require (.next/server/webpack-runtime.js:195:28)
+    at <unknown> (.next/server/webpack-runtime.js:108:40)
+    at Array.reduce (<anonymous>)
+    at __webpack_require__.e (.next/server/webpack-runtime.js:107:67) {
+  type: 'Error',
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [Array]
+}

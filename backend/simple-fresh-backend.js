@@ -1,0 +1,1250 @@
+const express = require('express');
+const cors = require('cors');
+const fs = require('fs');
+const path = require('path');
+const app = express();
+const DATA_FILE = path.join(__dirname, 'data.json');
+function loadData() {
+  try {
+    const raw = fs.readFileSync(DATA_FILE, 'utf8');
+    return JSON.parse(raw);
+  } catch (e) { return null; }
+}
+function saveData(data) {
+  try { fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2)); } catch (e) { console.error('Failed to save data', e); }
+}
+
+// In-memory demo users
+const users = [
+  { id: '1', email: 'admin@acme.example.com', name: 'Admin User', role: 'admin', active: true },
+  { id: '2', email: 'manager@acme.example.com', name: 'Manager User', role: 'manager', active: true },
+];
+const tokenToEmail = new Map();
+
+// In-memory assessments & related data
+function isoDaysAgo(n){ const d=new Date(); d.setDate(d.getDate()-n); return d.toISOString(); }
+const assessments = [
+  { id: 'A-001', title: 'Assessment/ Project Name', col: 'backlog',    dueIn: '1 Days', framework: 'PCI DSS 3.2.1',            created: isoDaysAgo(12) },
+  { id: 'A-002', title: 'Assessment/ Project Name', col: 'inprogress', dueIn: '2 Days', framework: 'PCI DSS 4.0',              created: isoDaysAgo(9)  },
+  { id: 'A-003', title: 'Assessment/ Project Name', col: 'review',     dueIn: '3 Days', framework: 'ISO/IEC 27001:2013',       created: isoDaysAgo(20) },
+  { id: 'A-004', title: 'Assessment/ Project Name', col: 'finished',   dueIn: 'Complete', framework: 'SOC 2 Type II',          created: isoDaysAgo(35) },
+];
+
+const tasksByAssessment = {
+  'A-001': [
+    { id: 'T-1001', name:'Project planning Syncup 1.1', status:'In Progress', due:'3 Days' },
+    { id: 'T-1002', name:'Requirement 1.1', status:'Completed', due:'7 Days' },
+  ],
+  'A-002': [],
+  'A-003': [],
+  'A-004': [],
+};
+
+// Messages (supports threads and tags)
+// Message shape: { id, user, time, text, parentId?: string|null, sections?: string[], attachments?: string[] }
+const messagesByAssessment = {
+  'A-001': [
+    { id:'M-1', user:'Lee, Jason', time:'Nov 11, 2020 12:05 PM', text:'When can I expect the final evidences for request 1?', sections:['1.1'] },
+    { id:'M-2', user:'Beckham, Victoria', time:'Nov 12, 2020 05:34 PM', text:'We are working with the vendors on this. We should be able to send it by tomorrow.', parentId:'M-1' },
+  ]
+};
+
+const attachmentsByAssessment = {
+  'A-001': [
+    { id:'F-1', name:'Finalized Evidence', created:'May 1, 2020 15:00:00 AM', modified:'May 14, 2019 15:00:00 AM', size:'1 Item' },
+    { id:'F-2', name:'Evidence1 Version 1.doc', created:'Nov 13, 2020 12:01:05 AM', modified:'Nov 13, 2020 12:01:05 AM', size:'10 MB' },
+  ]
+};
+
+// Section attachments mapping: { [assessmentId]: { [subsectionId]: [attachmentId] } }
+const sectionAttachmentsByAssessment = {
+  // example: 'A-002': { '1.1': ['F-abc'] }
+};
+
+// Answers store: { [assessmentId]: { [subsectionId]: { fieldId: value } } }
+const answersByAssessment = {
+  'A-002': {
+    '1.1': { companyName: 'ABC Inc.', companyAddress: '320, Petro Avenue Ln', assessorCompany: 'ABC Inc.' }
+  }
+};
+
+// Framework structures (minimal demo). Keyed by the value stored in assessment.framework
+// For production, prefer stable framework codes (e.g., pci-dss-4-0) and a dedicated /frameworks API.
+const frameworkStructures = {
+  'PCI DSS 4.0': {
+    code: 'pci-dss-4-0',
+    parts: [
+      {
+        title: 'Part I: Assessment Overview',
+        sections: [
+          {
+            number: 1,
+            heading: 'Contact Information and Summary of Results',
+            items: [
+              { id: '1.1', number: '1.1', label: 'Contact Information', fields: [
+                // Assessed Entity
+                { id:'ae_heading', type:'heading', label:'Assessed Entity' },
+                { id:'companyName', type:'text', label:'Company name', required:true },
+                { id:'dba', type:'text', label:'DBA (doing business as)' },
+                { id:'mailingAddress', type:'text', label:'Mailing address' },
+                { id:'companyWebsite', type:'text', label:'Company main website' },
+                { id:'contactName', type:'text', label:'Contact name' },
+                { id:'contactTitle', type:'text', label:'Contact title' },
+                { id:'contactPhone', type:'text', label:'Contact phone number' },
+                { id:'contactEmail', type:'text', label:'Contact e-mail address' },
+                { id:'div1', type:'divider', label:'' },
+                // Assessed Entity Internal Security Assessors
+                { id:'isa_heading', type:'heading', label:'Assessed Entity Internal Security Assessors' },
+                { id:'isaName', type:'text', label:'ISA name' },
+                { id:'div2', type:'divider', label:'' },
+                // Qualified Security Assessor Company
+                { id:'qsa_heading', type:'heading', label:'Qualified Security Assessor Company' },
+                { id:'assessorCompany', type:'text', label:'Company name' },
+                { id:'assessorMailingAddress', type:'text', label:'Mailing address' },
+                { id:'assessorWebsite', type:'text', label:'Company website' },
+                { id:'div3', type:'divider', label:'' },
+                // Lead Qualified Security Assessor
+                { id:'lead_heading', type:'heading', label:'Lead Qualified Security Assessor' },
+                { id:'leadAssessorName', type:'text', label:'Lead Assessor name' },
+                { id:'leadAssessorPhone', type:'text', label:'Assessor phone number' },
+                { id:'leadAssessorEmail', type:'text', label:'Assessor e-mail address' },
+                { id:'leadAssessorCert', type:'text', label:'Assessor certificate number' },
+                { id:'div4', type:'divider', label:'' },
+                // Additional Assessors
+                { id:'add_heading', type:'heading', label:'Additional Assessors' },
+                { id:'associateQsaName', type:'text', label:'Associate QSA name' },
+                { id:'associateQsaMentorName', type:'text', label:'Associate QSA mentor name' },
+                { id:'assessorName', type:'text', label:'Assessor name' },
+                { id:'assessorCertificate', type:'text', label:'Assessor certificate number' },
+                { id:'div5', type:'divider', label:'' },
+                // QA Primary Reviewer
+                { id:'qa_heading', type:'heading', label:'Assessor Quality Assurance (QA) Primary Reviewer for this specific report' },
+                { id:'qaReviewerName', type:'text', label:'QA reviewer name' },
+                { id:'qaReviewerPhone', type:'text', label:'QA reviewer phone number' },
+                { id:'qaReviewerEmail', type:'text', label:'QA reviewer e-mail address' },
+                { id:'qaReviewerCredentials', type:'text', label:'QA reviewer’s PCI credentials or certificate number' },
+                { id:'div6', type:'divider', label:'' },
+                { id:'notes', type:'textarea', label:'Notes' }
+              ] },
+              { id: '1.2', number: '1.2', label: 'Date and Timeframe of Assessment',
+                description: 'Provide the dates related to the ROC and the assessment timeframe.',
+                fields: [
+                  { id:'dateOfReport', type:'date', label:'Date of Report', help: 'Date of Report: The “Date of Report” indicates the completion date of the ROC, and therefore must be no earlier than the date on which the QSA Company and assessed entity agree on the final version of the ROC.' },
+                  { id:'dateAssessmentBegan', type:'date', label:'Date assessment began', help: 'This is the first date that evidence was gathered, or observations were made.' },
+                  { id:'dateAssessmentEnded', type:'date', label:'Date assessment ended', help: 'This is the last date that evidence was gathered, or observations were made.' },
+                  { id:'onsiteDates', type:'text', label:"Identify the date(s) spent onsite at the assessed entity." }
+                ]
+              },
+              { id: '1.3', number: '1.3', label: 'Remote Assessment Activities',
+                description: 'Refer to the PCI SSC Remote Assessment Guidelines and Procedures on the PCI SSC website for more information.',
+                fields: [
+                  { id:'remoteTestingExtent', type:'radio', label:'To what extent were remote testing methods used for this assessment?', options:[
+                    'All testing was performed onsite',
+                    'A combination of onsite and remote testing methods was used',
+                    'All testing was performed remotely'
+                  ]},
+                  { id:'remoteTestingReason', type:'textarea', label:'If remote testing was used, briefly describe why onsite testing was not feasible or practical.' }
+                ]
+              },
+              { id: '1.4', number: '1.4', label: 'Additional Services Provided by QSA Company',
+                description: 'Complete after reviewing the relevant portions of the QSA Qualification Requirements to ensure responses are consistent with documented obligations.',
+                fields: [
+                  { id:'consultationProvided', type:'radio', label:'Indicate whether the QSA Company provided any consultation on the development or implementation of controls used for the Customized Approach. (Does not apply to the assessment of the Customized Approach.)', options:['Yes','No'] },
+                  { id:'consultationDescription', type:'textarea', label:'If “Yes,” describe the nature of the consultation.' },
+                  { id:'discloseProductsServices', type:'textarea', label:'Disclose all products or services provided to the assessed entity by the QSA Company that could reasonably be viewed to affect independence of assessment.' },
+                  { id:'conflictMitigation', type:'textarea', label:'Describe efforts made to ensure no conflict of interest resulted from the above-mentioned products and services.' }
+                ]
+              },
+              { id: '1.5', number: '1.5', label: 'Use of Subcontractors',
+  description: 'Indicate whether any assessment activities were subcontracted to another Assessor Company.',
+  fields: [
+    { id:'subcontracted', type:'radio', label:'Indicate whether any assessment activities were subcontracted to another Assessor Company.', options:['Yes','No'] },
+    { id:'subcontractors', type:'textarea', label:'If yes, identify the Assessor Company(s) utilized during the assessment.' }
+  ]
+},
+{ id: '1.6', number: '1.6', label: 'Additional Information/Reporting',
+  description: 'Identify the number of consecutive years (including the current year) the QSA Company has issued ROCs for this entity.',
+  fields: [
+    { id:'consecutiveYearsRocs', type:'number', label:'Number of consecutive years QSA has issued ROCs for this entity' }
+  ]
+},
+{ id: '1.7', number: '1.7', label: 'Overall Assessment Result',
+  description: 'Select whether a full or partial assessment was completed, then select one overall result.',
+  fields: [
+    { id:'assessmentCompletion', type:'radio-table', label:'Indicate below whether a full or partial assessment was completed. Select only one.', options:[
+      'Full Assessment | All requirements have been assessed and therefore no requirements were marked as Not Tested.',
+      'Partial Assessment | One or more requirements have not been assessed and were therefore marked as Not Tested. Any requirement not assessed is noted as Not Tested in section 1.8.1 below.'
+    ] },
+    { id:'assessmentOutcome', type:'radio-table', label:'Overall Assessment Result (Select only one)', options:[
+      'Compliant | All sections of the PCI DSS ROC are complete, and all assessed requirements are marked as being either In Place or Not Applicable, resulting in an overall COMPLIANT rating; thereby the assessed entity has demonstrated compliance with all PCI DSS requirements except those noted as Not Tested above.',
+      'Non-Compliant | Not all sections of the PCI DSS ROC are complete, or one or more requirements are marked as Not in Place, resulting in an overall NON-COMPLIANT rating; thereby the assessed entity has not demonstrated compliance with PCI DSS requirements.',
+      'Compliant but with Legal Exception | One or more assessed requirements in the ROC are marked as Not in Place due to a legal restriction that prevents the requirement from being met and all other assessed requirements are marked as being either In Place or Not Applicable, resulting in an overall COMPLIANT BUT WITH LEGAL EXCEPTION rating, thereby the assessed entity has demonstrated compliance with all PCI DSS requirements except those noted as Not Tested above or as Not in Place due to a legal restriction.'
+    ] }
+  ]
+},
+              { id: '1.8', number: '1.8', label: 'Summary of Assessment',
+                description: 'Summary of Assessment Findings and Methods',
+                fields: [
+                  { id:'summaryPrincipal', type:'checkbox-table', label:'Assessment Finding — Select all options that apply.',
+                    columns:[
+                      { id:'inPlace', label:'In Place', group:'Assessment Finding' },
+                      { id:'notApplicable', label:'Not Applicable', group:'Assessment Finding' },
+                      { id:'notTested', label:'Not Tested', group:'Assessment Finding' },
+                      { id:'notInPlace', label:'Not in Place', group:'Assessment Finding' },
+                      { id:'compensatingControl', label:'Compensating Control', group:'Select If Below Method(s) Was Used' },
+                      { id:'customizedApproach', label:'Customized Approach', group:'Select If Below Method(s) Was Used' }
+                    ],
+                    rows:[
+                      { id:'r1', label:'Requirement 1:' },
+                      { id:'r2', label:'Requirement 2:' },
+                      { id:'r3', label:'Requirement 3:' },
+                      { id:'r4', label:'Requirement 4:' },
+                      { id:'r5', label:'Requirement 5:' },
+                      { id:'r6', label:'Requirement 6:' },
+                      { id:'r7', label:'Requirement 7:' },
+                      { id:'r8', label:'Requirement 8:' },
+                      { id:'r9', label:'Requirement 9:' },
+                      { id:'r10', label:'Requirement 10:' },
+                      { id:'r11', label:'Requirement 11:' },
+                      { id:'r12', label:'Requirement 12:' }
+                    ]
+                  },
+                  { id:'summaryAppendix', type:'checkbox-table', label:'Assessment Finding — Select all options that apply.',
+                    columns:[
+                      { id:'inPlace', label:'In Place', group:'Assessment Finding' },
+                      { id:'notApplicable', label:'Not Applicable', group:'Assessment Finding' },
+                      { id:'notTested', label:'Not Tested', group:'Assessment Finding' },
+                      { id:'notInPlace', label:'Not in Place', group:'Assessment Finding' },
+                      { id:'compensatingControl', label:'Compensating Control', group:'Select If Below Method(s) Was Used' },
+                      { id:'customizedApproach', label:'Customized Approach', group:'Select If Below Method(s) Was Used' }
+                    ],
+                    rows:[
+                      { id:'a1', label:'Appendix A1:' },
+                      { id:'a2', label:'Appendix A2:' },
+                      { id:'a3', label:'Appendix A3:' }
+                    ]
+                  }
+                ]
+              },
+],
+          },          {
+            number: 2,
+            heading: 'Business Overview',
+            items: [
+              { id: '2.1', number: '2.1', label: 'Description of the Entity’s Payment Card Business',
+                fields: [
+                  { id:'businessOverview', type:'form-table', label:'', help:'Provide an overview of the entity’s payment card business, including:', rows: [
+                    { id:'descNature', type:'textarea', label:'Describe the nature of the entity’s business (what kind of work they do, etc.).', help:'Note: This is not intended to be a cut-and-paste from the entity’s website but should be a tailored description that shows the assessor understands the business of the entity being assessed.' },
+                    { id:'descStoreProcess', type:'textarea', label:'Describe the entity’s business, services, or functions that store, process, or transmit account data.' },
+                    { id:'descImpactSecurity', type:'textarea', label:'Describe any services or functions that the entity performs that could impact the security of account data. (For example, merchant web site payment redirects or if the entity provides managed services)' },
+                    { id:'paymentChannels', type:'checkboxes', label:'Identify the payment channels the entity utilizes.', options:['Card-Present','Mail Order/Telephone Order (MOTO)','E-Commerce'] },
+                    { id:'otherDetails', type:'textarea', label:'Other details, if applicable:' }
+                  ] }
+                ]
+              },
+            ],
+          },
+{
+            number: 3,
+            heading: 'Description of Scope of Work and Approach Taken',
+            items: [
+              { id: '3.1', number: '3.1', label: 'Assessor’s Validation of Defined Scope Accuracy', fields: [
+                { id:'instructions3_1', type:'alert', variant:'info', label:'Instructions', help:'Describe how the assessor validated the accuracy of the defined PCI DSS scope for the assessment. As noted in PCI DSS Requirements and Testing Procedures, the entity must retain documentation showing how PCI DSS scope was determined (per Requirement 12.5.2). For each PCI DSS assessment, the assessor validates that the assessment scope is accurately defined and documented.' },
+                { id:'scopeValidation', type:'form-table', label:'Assessor’s Validation of Defined Scope Accuracy', help:'Describe how the assessor validated the accuracy of the defined PCI DSS scope for the assessment.', rows: [
+                  { id:'diffFrom12_5', type:'textarea', label:"Describe how the assessor's evaluation of scope differs from the assessed entity's evaluation of scope as documented in Requirement 12.5. If no difference was identified, mark as 'Not Applicable.'" },
+                  { id:'assessorAttestor', type:'textarea', label:'Provide the name of the assessor who attests that:', help:'• They have performed an independent evaluation of the scope of the assessed entity’s PCI DSS environment.\n• If the assessor’s evaluation identified areas of scope not included in the assessed entity’s documented scope, the assessed entity has updated their scoping documentation.\n• The scope of the assessment is complete and accurate to the best of the assessor’s knowledge.' },
+                  { id:'exclusions', type:'textarea', label:'Describe any business functions, locations, payment channels, or other areas of scope that were excluded from the assessment, including:', help:'• What was excluded.\n• Why it was excluded.\n• If it was included in a separate assessment.\n\nIf none, mark as “Not Applicable.”' },
+                  { id:'scopeReduction', type:'textarea', label:'Identify any factors that resulted in reducing or limiting scope (for example, segmentation of the environment, use of a P2PE solution, etc.). If none, mark as “Not Applicable.”' },
+                  { id:'saqEligibility', type:'textarea', label:'Describe any use of SAQ eligibility criteria in determining applicability of PCI DSS requirements for this assessment, including:', help:'• The type of SAQ applied.\n• The eligibility criteria for the applicable SAQ.\n• How the assessor verified that the assessed entity’s environment meets the eligibility criteria.\n\nNote: The only SAQ for service providers is SAQ D for Service Providers. All other SAQs are for merchants only.\n\nIf not used, mark as “Not Applicable.”' },
+                  { id:'additionalInfo', type:'textarea', label:'Additional information, if applicable' }
+                ] }
+              ] },
+              { id: '3.2', number: '3.2', label: 'Segmentation', fields: [
+  { id:'instructions3_2', type:'alert', variant:'info', label:'Instructions', help:'Indicate whether the assessed entity has used segmentation to reduce the scope of the assessment.\nNote: An environment with no segmentation is considered a “flat” network where all systems are considered to be in scope.' },
+  { id:'segmentationDetails', type:'form-table', label:'', rows: [
+    { id:'segmentationUsed', type:'radio', label:'Indicate whether the assessed entity has used segmentation to reduce the scope of the assessment', help:'Note: An environment with no segmentation is considered a “flat” network where all systems are considered to be in scope of the assessment.', options:['Yes','No'] },
+    { id:'ifNoAttestor', type:'text', label:'If “No”, provide the name of the assessor who attests that the entire network has been included in the scope of the assessment.', when: { fieldId:'segmentationUsed', equals:'No' } },
+    { id:'descImplementation', type:'textarea', label:'If “Yes”, describe how the segmentation is implemented, including the technologies and processes used.', when: { fieldId:'segmentationUsed', equals:'Yes' } },
+    { id:'outOfScopeEnvs', type:'textarea', label:'If “Yes”, describe the environments that were confirmed to be out of scope as a result of the segmentation methods.', when: { fieldId:'segmentationUsed', equals:'Yes' } },
+    { id:'yesAttestor', type:'text', label:'If “Yes”, provide the name of the assessor who attests that the segmentation was verified to be adequate to reduce the scope of the assessment and that the technologies/processes used to implement segmentation were included in this PCI DSS assessment.', when: { fieldId:'segmentationUsed', equals:'Yes' } }
+  ] }
+] },
+  
+{ id: '3.3', number: '3.3', label: 'PCI SSC Validated Products and Solutions', fields: [
+  { id:'instructions3_3', type:'alert', variant:'info', label:'Instructions', help:'For purposes of this document, “Lists of Validated Products and Solutions” means the lists of validated products, solutions, and/or components appearing on the PCI SSC website (www.pcisecuritystandards.org). Examples include: 3DS Software Development Kits, Approved PTS Devices, Validated Payment Software, Point to Point Encryption (P2PE) solutions, Software-Based PIN Entry on COTS (SPoC) solutions, Contactless Payments on COTS (CPoC) solutions, and Mobile Payment on COTS (MPoC) products.' },
+  { id:'usesValidatedProducts', type:'radio', label:'Indicate whether the assessed entity uses one or more PCI SSC validated products or solutions', options:['Yes','No'] },
+  { id:'validatedProductsHeading', type:'heading', label:'If “Yes,” provide the following regarding items the organization uses from PCI SSC’s Lists of Validated Products and Solutions', when: { fieldId:'usesValidatedProducts', equals:'Yes' } },
+  { id:'validatedProductsIntroInput', type:'text', label:'', when: { fieldId:'usesValidatedProducts', equals:'Yes' } },
+  { id:'validatedProducts', type:'table-list', label:'', minRows:5, columns: [
+    { id:'name', label:'Name of PCI SSC validated product or solution', width:'36%', placeholder:'Product or solution name' },
+    { id:'version', label:'Version of product or solution', width:'16%', placeholder:'1.2.3' },
+    { id:'standard', label:'PCI SSC Standard to which product or solution was validated', width:'24%', placeholder:'e.g., P2PE' },
+    { id:'listingRef', label:'PCI SSC listing reference number', width:'16%', placeholder:'REF-12345' },
+    { id:'expiryDate', label:'Expiry date of listing', type:'date', width:'8%' }
+  ] },
+  { id:'validatedAssessorAttestor', type:'form-table', label:'Attestations and comments', rows: [
+    { id:'manualAttestor', type:'textarea', label:'Provide the name of the assessor who attests that they have read the instruction manual associated with each of the solution(s) listed above and confirmed that the merchant has implemented the solution per the instructions and detail in the instruction manual.' },
+    { id:'additionalComments', type:'textarea', label:'Any additional comments or findings the assessor would like to include, if applicable.' }
+  ] }
+] }
+],
+          },
+                    {
+            number: 4,
+            heading: 'Details about Reviewed Environments',
+            items: [
+  { id: '4.1', number: '4.1', label: 'Network Diagrams', fields: [
+    { id:'nw_info', type:'heading', label:'Provide one or more network diagrams that:' },
+    { id:'nw_diagrams', type:'textarea', label:'Insert diagrams (upload in Attachments and link this section)'}
+  ] },
+  { id: '4.2', number: '4.2', label: 'Account Dataflow Diagrams', fields: [
+    { id:'df_info', type:'heading', label:'Provide one or more dataflow diagrams that:' },
+    { id:'df_diagrams', type:'textarea', label:'Insert diagrams (upload in Attachments and link this section)' },
+    { id:'df_desc_heading', type:'heading', label:'4.2.1 Description of Account Data Flows' },
+    { id:'df_participates', type:'checkbox', label:'Identify in which of the following account data flows the assessed entity participates', options:['Authorization','Capture','Settlement','Chargeback/Dispute','Refunds','Other'] },
+    { id:'df_flows', type:'table-list', label:'Identify and describe all data flows', minRows:3, columns:[
+      { id:'flow', label:'Account data flows', width:'35%', placeholder:'Account data flow 1' },
+      { id:'description', label:'Description', width:'65%', placeholder:'Include the type of account data' }
+    ]}
+  ] }
+  , { id: '4.3', number: '4.3', label: 'Storage of Account Data', fields: [
+    { id:'accountDataStores', type:'table-list', label:'Identify all databases, tables, and files storing account data', help:'Note: The list must be supported by an inventory retained by the assessor.', minRows:3, columns:[
+      { id:'dataStore', label:'Data Store', width:'16%' },
+      { id:'names', label:'File/Table/Field Names', width:'28%' },
+      { id:'elements', label:'Account Data Elements Stored', width:'24%' },
+      { id:'security', label:'How Data Is Secured', width:'16%' },
+      { id:'logging', label:'How Access to Data Stores Is Logged', width:'16%' }
+    ] },
+    { id:'sad_heading', type:'heading', label:'4.3.1 Storage of SAD' },
+    { id:'sad431Instr', type:'alert', variant:'info', label:'Instructions', help:'If SAD is stored, complete the following.' },
+    { id:'sad431Note', type:'alert', variant:'warning', label:'Note', help:'Anywhere SAD is stored should be documented in the table in 4.3.' },
+    { id:'sadStoredPostAuthorization', type:'radio', label:'Indicate whether SAD is stored post authorization', options:['Yes','No'] },
+    { id:'sadStoredAsIssuer', type:'radio', label:'Indicate whether SAD is stored as part of Issuer functions', options:['Yes','No'] }
+  ] }
+  , { id: '4.4', number: '4.4', label: 'In-Scope Third-Party Service Providers (TPSPs)', fields: [
+    { id:'tpsps', type:'table-list', label:'Provide the following for each third-party service provider', minRows:3, columns:[
+      { id:'company', label:'Company Name', width:'24%' },
+      { id:'dataShared', label:'Account data shared or potential impact to account data security', width:'40%' },
+      { id:'purpose', label:'Purpose for utilizing the service provider', width:'36%' }
+    ] },
+    { id:'assessedSeparately', type:'radio', label:'Has the third party been assessed separately against PCI DSS?', options:['Yes','No'] },
+    { id:'tpspAoc', type:'table-list', label:'If Yes, identify the date and PCI DSS version of the AOC.', when: { fieldId:'assessedSeparately', equals:'Yes' }, minRows:3, columns:[
+      { id:'aocDate', label:'Date', type:'date', width:'50%' },
+      { id:'aocVersion', label:'Version', width:'50%' }
+    ] },
+    { id:'tpspIncludedIfNo', type:'table-list', label:'If No, were the services provided by the third party included in this assessment?', when: { fieldId:'assessedSeparately', equals:'No' }, minRows:3, columns:[
+      { id:'yes', label:'Yes', width:'50%' },
+      { id:'no', label:'No', width:'50%' }
+    ] }
+  ] }
+  , { id: '4.5', number: '4.5', label: 'In-Scope Networks', fields: [
+    { id:'networksWithAD', type:'table-list', label:'Describe all networks that store, process, and/or transmit Account Data', minRows:2, columns:[
+      { id:'networkName', label:'Network Name (In scope)' },
+      { id:'networkType', label:'Type of Network' },
+      { id:'networkFunction', label:'Function/Purpose of Network' }
+    ] },
+    { id:'networksInScopeNoAD', type:'table-list', label:'Describe all networks that do not store, process, and/or transmit Account Data but are still in scope—for example, connected to the CDE or provide management functions to the CDE', minRows:2, columns:[
+      { id:'networkName', label:'Network Name (In scope)' },
+      { id:'networkType', label:'Type of Network' },
+      { id:'networkFunction', label:'Function/Purpose of Network' }
+    ] }
+  ] }
+  , { id: '4.6', number: '4.6', label: 'In-Scope Locations/Facilities', fields: [
+    { id:'locationsFacilities', type:'table-list', label:'Identify and provide details for all types of physical locations/facilities in scope', minRows:2, columns:[
+      { id:'facilityType', label:'Facility Type', width:'36%' },
+      { id:'totalCount', label:'Total Number of Locations', type:'number', width:'16%' },
+      { id:'facilityLocations', label:'Location(s) of Facility', width:'48%' }
+    ] }
+  ] }
+  , { id: '4.7', number: '4.7', label: 'In-Scope System Component Types', fields: [
+    { id:'systemComponents', type:'table-list', label:'Identify all types of system components in scope', minRows:3, columns:[
+      { id:'componentType', label:'Type of System Component', width:'26%' },
+      { id:'componentCount', label:'Total Number of System Components', type:'number', width:'16%' },
+      { id:'vendor', label:'Vendor', width:'18%' },
+      { id:'product', label:'Product Name and Version', width:'20%' },
+      { id:'role', label:'Role/Function Description', width:'20%' }
+    ] }
+  ] }
+]
+          },
+        
+          {
+            number: 5,
+            heading: 'Quarterly Scan Results',
+            items: [
+  { id: '5.1', number: '5.1', label: 'Quarterly External Scan Results', fields: [
+    { id:'extScans', type:'table-list', label:'Identify each quarterly ASV scan performed within the last 12 months', minRows:4, columns:[
+      { id:'date', label:'Date of the Scan(s)', type:'date', width:'18%' },
+      { id:'asvName', label:'Name of ASV that Performed the Scan', width:'28%' },
+      { id:'failedInitial', label:'Failed initial scan? (Yes/No)', type:'radio', options:['Yes','No'], width:'14%' },
+      { id:'rescanDates', label:'If Failed: Date(s) of re-scans showing vulnerabilities corrected', type:'date', when:{ columnId:'failedInitial', equals:'Yes' }, width:'40%' }
+    ] },
+    { id:'isInitialExternal', type:'radio', label:"Indicate whether this is the assessed entity’s initial PCI DSS assessment against the ASV scan requirements", options:['Yes','No'] },
+    { id:'initialExternalDoc', type:'text', label:"If yes, identify the document verified that includes policies/procedures requiring scanning at least once every three months going forward", when:{ fieldId:'isInitialExternal', equals:'Yes' } },
+    { id:'externalComments', type:'textarea', label:'Assessor comments, if applicable' }
+  ] },
+  { id: '5.2', number: '5.2', label: 'Attestations of Scan Compliance', fields: [
+    { id:'attestationCompleted', type:'radio', label:'Indicate whether the ASV and the assessed entity completed the Attestations of Scan Compliance (ASV Program Guide)', options:['Yes','No'] },
+    { id:'attestationComments', type:'textarea', label:'Comments (optional)' }
+  ] },
+  { id: '5.3', number: '5.3', label: 'Quarterly Internal Scan Results', fields: [
+    { id:'intScans', type:'table-list', label:'Identify each quarterly internal vulnerability scan performed within the last 12 months', minRows:4, columns:[
+      { id:'date', label:'Date of the Scan(s)', type:'date', width:'18%' },
+      { id:'authenticated', label:'Was the scan performed via authenticated scanning? (Yes/No)', type:'radio', options:['Yes','No'], width:'22%' },
+      { id:'highRiskFound', label:"Any high-risk or critical vulnerabilities per the entity’s rankings (Req. 6.3.1)? (Yes/No)", type:'radio', options:['Yes','No'], width:'22%' },
+      { id:'rescanDates', label:'If high-risk/critical found: Date(s) of re-scans showing vulnerabilities corrected', type:'date', when:{ columnId:'highRiskFound', equals:'Yes' }, width:'38%' }
+    ] },
+    { id:'isInitialInternal', type:'radio', label:"Indicate if this is the assessed entity’s initial PCI DSS assessment against the internal scan requirements", options:['Yes','No'] },
+    { id:'initialInternalDoc', type:'text', label:"If yes, identify the document verified that includes policies/procedures requiring scanning at least once every three months going forward", when:{ fieldId:'isInitialInternal', equals:'Yes' } },
+    { id:'internalComments', type:'textarea', label:'Assessor comments, if applicable' }
+  ] }
+],
+          },
+        ],
+      },
+      {
+        title: 'Part II: Sampling and Evidence, Findings and Observations',
+        sections: [
+          {
+            number: 6,
+            heading: 'Sampling and Evidence',
+            items: [
+              { id: '6.1', number: '6.1', label: 'Sampling approach' },
+              { id: '6.2', number: '6.2', label: 'Evidence collected' },
+              { id: '6.3', number: '6.3', label: 'Sampled entities' },
+              { id: '6.4', number: '6.4', label: 'Deviations' },
+            ],
+          },
+          {
+            number: 7,
+            heading: 'Findings and Observations',
+            items: [
+              { id: '7.1', number: '7.1', label: 'Build and Maintain a Secure Network and Systems' },
+              { id: '7.2', number: '7.2', label: 'Protect Account Data' },
+              { id: '7.3', number: '7.3', label: 'Maintain a Vulnerability Management Program' },
+              { id: '7.4', number: '7.4', label: 'Implement Strong Access Control Measures' },
+              { id: '7.5', number: '7.5', label: 'Regularly Monitor and Test Networks' },
+              { id: '7.6', number: '7.6', label: 'Maintain an Information Security Policy' },
+              { id: 'APP-A', number: null, label: 'Appendix A: Additional PCI DSS Requirements' },
+              { id: 'APP-B', number: null, label: 'Appendix B: Compensating Controls' },
+              { id: 'APP-C', number: null, label: 'Appendix C: Compensating Controls Worksheet' },
+              { id: 'APP-D', number: null, label: 'Appendix D: Customized Approach' },
+              { id: 'APP-E', number: null, label: 'Appendix E: Customized Approach Template' },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  'PCI DSS 3.2.1': {
+    code: 'pci-dss-3-2-1',
+    parts: [
+      {
+        title: 'Part I: Assessment Overview',
+        sections: [
+          { number: 1, heading: 'Contact Information and Report', items: [
+            { id:'1.1', number:'1.1', label:'Contact Information' },
+            { id:'1.2', number:'1.2', label:'Date and timeframe of' },
+            { id:'1.3', number:'1.3', label:'PCI DSS version' },
+            { id:'1.4', number:'1.4', label:'Additional services provided' },
+            { id:'1.5', number:'1.5', label:'Summary of Findings' },
+          ]},
+          { number: 2, heading: 'Summary Overview', items: [
+            { id:'2.1', number:'2.1', label:"Description of the entity's" },
+            { id:'2.2', number:'2.2', label:'High-level network diagram' },
+          ]},
+        ],
+      },
+    ],
+  },
+};
+
+
+
+// Load persisted data if available
+const persisted = loadData();
+if (persisted) {
+  if (persisted.sectionAttachmentsByAssessment) Object.assign(sectionAttachmentsByAssessment, persisted.sectionAttachmentsByAssessment);
+  if (Array.isArray(persisted.assessments)) { assessments.length = 0; persisted.assessments.forEach(a=>assessments.push(a)); }
+  if (Array.isArray(persisted.users)) { users.length = 0; persisted.users.forEach(u=>users.push(u)); }
+  if (persisted.tasksByAssessment) Object.assign(tasksByAssessment, persisted.tasksByAssessment);
+  if (persisted.messagesByAssessment) Object.assign(messagesByAssessment, persisted.messagesByAssessment);
+  if (persisted.attachmentsByAssessment) Object.assign(attachmentsByAssessment, persisted.attachmentsByAssessment);
+  if (persisted.answersByAssessment) Object.assign(answersByAssessment, persisted.answersByAssessment);
+}
+// CORS & JSON
+app.use((req, res, next) => {
+  // Dev-only: set a safe Permissions-Policy that avoids 'browsing-topics' warnings
+  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  next();
+});
+app.use(cors({ origin: '*', methods: ['GET','POST','PUT','DELETE','OPTIONS'], allowedHeaders: ['Content-Type','Authorization'] }));
+app.use(express.json());
+
+function snapshot() {
+  return { assessments, tasksByAssessment, messagesByAssessment, attachmentsByAssessment, answersByAssessment, sectionAttachmentsByAssessment };
+}
+
+// Periodic save
+setInterval(()=> saveData(snapshot()), 10000);
+
+// Health
+app.get('/health', (req,res)=> res.json({ status:'OK', message:'Backend running!' }));
+
+// Auth
+app.post('/login', (req, res) => {
+  const { email, password } = req.body || {};
+  const isValid = (
+    (email === 'admin@acme.example.com' && password === 'demo123!') ||
+    (email === 'manager@acme.example.com' && password === 'demo123!')
+  );
+  if (!isValid) return res.status(401).json({ success:false, message:'Invalid credentials' });
+  const found = users.find(u => u.email === email);
+  const token = 'demo_token_' + Math.random().toString(36).slice(2);
+  tokenToEmail.set(token, email);
+  res.json({ success:true, token, user: found });
+});
+
+app.get('/me', (req, res) => {
+  const auth = req.headers.authorization || '';
+  const token = auth.startsWith('Bearer ') ? auth.slice(7) : null;
+  if (!token || !tokenToEmail.has(token)) return res.status(401).json({ success:false, message:'Unauthorized' });
+  const email = tokenToEmail.get(token);
+  const user = users.find(u => u.email === email);
+  if (!user) return res.status(404).json({ success:false, message:'User not found' });
+  res.json({ success:true, user });
+});
+
+
+// --- Compatibility aliases for frontend client ---
+// Auth login: returns { success, data: { user, token } }
+app.post('/api/auth/login', (req, res) => {
+  const { email, password } = req.body || {};
+  const isValid = (
+    (email === 'admin@acme.example.com' && password === 'demo123!') ||
+    (email === 'manager@acme.example.com' && password === 'demo123!')
+  );
+  if (!isValid) return res.status(401).json({ success:false, message:'Invalid credentials' });
+  const found = users.find(u => u.email === email);
+  const token = 'demo_token_' + Math.random().toString(36).slice(2);
+  tokenToEmail.set(token, email);
+  res.json({ success:true, data: { user: found, token } });
+});
+
+// Auth me: returns { success, data: user }
+app.get('/api/auth/me', (req, res) => {
+  const auth = req.headers.authorization || '';
+  const token = auth.startsWith('Bearer ') ? auth.slice(7) : null;
+  if (!token || !tokenToEmail.has(token)) return res.status(401).json({ success:false, message:'Unauthorized' });
+  const email = tokenToEmail.get(token);
+  const user = users.find(u => u.email === email);
+  if (!user) return res.status(404).json({ success:false, message:'User not found' });
+  res.json({ success:true, data: user });
+});
+
+// Dev stub: roles endpoint to avoid 404s in dev
+app.get('/api/me/roles', (req, res) => {
+  res.json({ success: true, rolesByOrg: [] });
+});
+
+
+// Users aliases
+app.get('/api/users', (req,res)=> res.json({ success:true, data: users }));
+app.post('/api/users', (req,res)=>{
+  const { email, name, role='member' } = req.body || {};
+  if (!email || !name) return res.status(400).json({ success:false, message:'email and name required' });
+  if (users.some(u=>u.email===email)) return res.status(409).json({ success:false, message:'email exists' });
+  const id = String(users.length ? Math.max(...users.map(u=>Number(u.id||0)||0))+1 : 1);
+  const user = { id, email, name, role, active:true };
+  users.push(user);
+  res.status(201).json({ success:true, data: user });
+});
+app.put('/api/users/:id', (req,res)=>{
+  const { id } = req.params; const idx = users.findIndex(u=>String(u.id)===String(id));
+  if (idx===-1) return res.status(404).json({ success:false, message:'not found' });
+  const { name, role, active } = req.body || {};
+  users[idx] = { ...users[idx], ...(name!==undefined?{name}:{}), ...(role!==undefined?{role}:{}), ...(active!==undefined?{active}:{}) };
+  res.json({ success:true, data: users[idx] });
+});
+app.delete('/api/users/:id', (req,res)=>{
+  const idx = users.findIndex(u=>String(u.id)===String(req.params.id));
+  if (idx===-1) return res.status(404).json({ success:false, message:'not found' });
+  users[idx].active = false; res.json({ success:true, data: users[idx] });
+});
+
+
+// Dashboard overview alias
+app.get('/api/dashboard/overview', (req,res)=>{
+  const payload = {
+    user: users[0],
+    stats: {
+      totalControls: 100,
+      completedControls: 85,
+      pendingEvidences: 15,
+      upcomingAudits: 2,
+    },
+    recentActivity: [
+      { id: '1', description: 'SOX Control evidence uploaded', user: 'Admin User', timestamp: new Date().toISOString(), type:'evidence_uploaded' },
+      { id: '2', description: 'Access Control policy updated', user: 'Manager User', timestamp: new Date().toISOString(), type:'control_updated' }
+    ],
+    controlsOverview: []
+  };
+  res.json({ success:true, data: payload });
+});
+// Dashboard sample
+app.get('/dashboard', (req, res) => {
+  res.json({
+    user: users[0],
+    stats: { totalControls: 100, completedControls: 85, pendingEvidences: 15, upcomingAudits: 2 },
+    recentActivity: [
+      { id: '1', type: 'evidence_uploaded', description: 'SOX Control evidence uploaded', timestamp: '2h ago', user: 'Admin User' },
+      { id: '2', type: 'control_updated', description: 'Access Control policy updated', timestamp: '4h ago', user: 'Manager User' },
+    ],
+    controlsOverview: []
+  });
+});
+
+// Users
+app.get('/users', (req,res)=> res.json({ success:true, users }));
+app.post('/users', (req,res)=>{
+  const { email, name, role='member' } = req.body || {};
+  if (!email || !name) return res.status(400).json({ success:false, message:'email and name required' });
+  if (users.some(u=>u.email===email)) return res.status(409).json({ success:false, message:'email exists' });
+  const id = String(users.length ? Math.max(...users.map(u=>Number(u.id)))+1 : 1);
+  const user = { id, email, name, role, active:true };
+  users.push(user);
+  res.status(201).json({ success:true, user }); saveData(snapshot());
+});
+app.put('/users/:id', (req,res)=>{
+  const { id } = req.params; const idx = users.findIndex(u=>u.id===id);
+  if (idx===-1) return res.status(404).json({ success:false, message:'not found' });
+  const { name, role, active } = req.body || {};
+  users[idx] = { ...users[idx], ...(name!==undefined?{name}:{}), ...(role!==undefined?{role}:{}), ...(active!==undefined?{active}:{}) };
+  res.json({ success:true, user: users[idx] }); saveData(snapshot());
+});
+app.delete('/users/:id', (req,res)=>{
+  const idx = users.findIndex(u=>u.id===req.params.id);
+  if (idx===-1) return res.status(404).json({ success:false, message:'not found' });
+  users[idx].active = false; res.json({ success:true, user: users[idx] }); saveData(snapshot()); saveData(snapshot());
+});
+
+// Assessments
+app.get('/assessments', (req,res)=> {
+  const q = (req.query.archived||'').toString();
+  let list = assessments;
+  if (q === 'true') list = assessments.filter(a => !!a.archived);
+  else if (q === 'all') list = assessments;
+  else list = assessments.filter(a => !a.archived);
+  // Ensure created and startDate fields exist for each assessment
+  const nowIso = new Date().toISOString();
+  list.forEach(a => { if (!a.created) a.created = nowIso; if (!a.startDate) a.startDate = a.created; });
+  res.json({ success:true, assessments: list });
+});
+app.post('/assessments', (req,res)=>{
+  const { title, col='backlog', dueIn='7 Days', framework='PCI DSS 3.2.1', created, startDate } = req.body || {};
+  if (!title) return res.status(400).json({ success:false, message:'title required' });
+  const maxNum = assessments.reduce((m,a)=>{
+    const n = Number((a.id||'').split('-')[1]);
+    return isNaN(n) ? m : Math.max(m, n);
+  }, 0);
+  const id = 'A-' + String(maxNum + 1).padStart(3,'0');
+  const nowIso = new Date().toISOString();
+  const a = { id, title, col, dueIn, framework, archived: false, created: created || nowIso, startDate: startDate || created || nowIso };
+  assessments.push(a);
+  tasksByAssessment[id] = [];
+  messagesByAssessment[id] = [];
+  attachmentsByAssessment[id] = [];
+  res.status(201).json({ success:true, assessment:a }); saveData(snapshot());
+});
+
+// Framework-resolved structure for an assessment
+app.get('/assessments/:id/structure', (req, res) => {
+  const a = assessments.find(x => x.id === req.params.id);
+  const fw = (a && (a.framework || 'PCI DSS 4.0')) || 'PCI DSS 4.0';
+  const structure = frameworkStructures[fw] || { parts: [] };
+
+  // Normalize section 4 for PCI DSS 4.0 to match ROC template (Network + Dataflow diagrams)
+  if (fw === 'PCI DSS 4.0') {
+    try {
+      const parts = structure.parts || [];
+      const first = parts[0];
+      if (first && Array.isArray(first.sections)) {
+        const idx4 = first.sections.findIndex((s) => String(s.number) === '4');
+        if (idx4 !== -1) {
+          first.sections[idx4] = {
+            number: 4,
+            heading: 'Details about Reviewed Environments',
+            items: [
+  { id: '4.1', number: '4.1', label: 'Network Diagrams', fields: [
+    { id:'nw_info', type:'heading', label:'Provide one or more network diagrams that:' },
+    { id:'nw_diagrams', type:'textarea', label:'Insert diagrams (upload in Attachments and link this section)'}
+  ] },
+  { id: '4.2', number: '4.2', label: 'Account Dataflow Diagrams', fields: [
+    { id:'df_info', type:'heading', label:'Provide one or more dataflow diagrams that:' },
+    { id:'df_diagrams', type:'textarea', label:'Insert diagrams (upload in Attachments and link this section)' },
+    { id:'df_desc_heading', type:'heading', label:'4.2.1 Description of Account Data Flows' },
+    { id:'df_participates', type:'checkbox', label:'Identify in which of the following account data flows the assessed entity participates', options:['Authorization','Capture','Settlement','Chargeback/Dispute','Refunds','Other'] },
+    { id:'df_flows', type:'table-list', label:'Identify and describe all data flows', minRows:3, columns:[
+      { id:'flow', label:'Account data flows', width:'35%', placeholder:'Account data flow 1' },
+      { id:'description', label:'Description', width:'65%', placeholder:'Include the type of account data' }
+    ]}
+  ] }
+  , { id: '4.3', number: '4.3', label: 'Storage of Account Data', fields: [
+    { id:'accountDataStores', type:'table-list', label:'Identify all databases, tables, and files storing account data', help:'Note: The list must be supported by an inventory retained by the assessor.', minRows:3, columns:[
+      { id:'dataStore', label:'Data Store', width:'16%' },
+      { id:'names', label:'File/Table/Field Names', width:'28%' },
+      { id:'elements', label:'Account Data Elements Stored', width:'24%' },
+      { id:'security', label:'How Data Is Secured', width:'16%' },
+      { id:'logging', label:'How Access to Data Stores Is Logged', width:'16%' }
+    ] },
+    { id:'sad_heading', type:'heading', label:'4.3.1 Storage of SAD' },
+    { id:'sad431Instr', type:'alert', variant:'info', label:'Instructions', help:'If SAD is stored, complete the following.' },
+    { id:'sad431Note', type:'alert', variant:'warning', label:'Note', help:'Anywhere SAD is stored should be documented in the table in 4.3.' },
+    { id:'sadStoredPostAuthorization', type:'radio', label:'Indicate whether SAD is stored post authorization', options:['Yes','No'] },
+    { id:'sadStoredAsIssuer', type:'radio', label:'Indicate whether SAD is stored as part of Issuer functions', options:['Yes','No'] }
+  ] }
+  , { id: '4.4', number: '4.4', label: 'In-Scope Third-Party Service Providers (TPSPs)', fields: [
+    { id:'tpsps', type:'table-list', label:'Provide the following for each third-party service provider', minRows:3, columns:[
+      { id:'company', label:'Company Name', width:'24%' },
+      { id:'dataShared', label:'Account data shared or potential impact to account data security', width:'40%' },
+      { id:'purpose', label:'Purpose for utilizing the service provider', width:'36%' }
+    ] },
+    { id:'assessedSeparately', type:'radio', label:'Has the third party been assessed separately against PCI DSS?', options:['Yes','No'] },
+    { id:'tpspAoc', type:'table-list', label:'If Yes, identify the date and PCI DSS version of the AOC.', when: { fieldId:'assessedSeparately', equals:'Yes' }, minRows:3, columns:[
+      { id:'aocDate', label:'Date', type:'date', width:'50%' },
+      { id:'aocVersion', label:'Version', width:'50%' }
+    ] },
+    { id:'tpspIncludedIfNo', type:'table-list', label:'If No, were the services provided by the third party included in this assessment?', when: { fieldId:'assessedSeparately', equals:'No' }, minRows:3, columns:[
+      { id:'yes', label:'Yes', width:'50%' },
+      { id:'no', label:'No', width:'50%' }
+    ] }
+  ] }
+  , { id: '4.5', number: '4.5', label: 'In-Scope Networks', fields: [
+    { id:'networksWithAD', type:'table-list', label:'Describe all networks that store, process, and/or transmit Account Data', minRows:2, columns:[
+      { id:'networkName', label:'Network Name (In scope)' },
+      { id:'networkType', label:'Type of Network' },
+      { id:'networkFunction', label:'Function/Purpose of Network' }
+    ] },
+    { id:'networksInScopeNoAD', type:'table-list', label:'Describe all networks that do not store, process, and/or transmit Account Data but are still in scope—for example, connected to the CDE or provide management functions to the CDE', minRows:2, columns:[
+      { id:'networkName', label:'Network Name (In scope)' },
+      { id:'networkType', label:'Type of Network' },
+      { id:'networkFunction', label:'Function/Purpose of Network' }
+    ] }
+  ] }
+  , { id: '4.6', number: '4.6', label: 'In-Scope Locations/Facilities', fields: [
+    { id:'locationsFacilities', type:'table-list', label:'Identify and provide details for all types of physical locations/facilities in scope', minRows:2, columns:[
+      { id:'facilityType', label:'Facility Type', width:'36%' },
+      { id:'totalCount', label:'Total Number of Locations', type:'number', width:'16%' },
+      { id:'facilityLocations', label:'Location(s) of Facility', width:'48%' }
+    ] }
+  ] }
+  , { id: '4.7', number: '4.7', label: 'In-Scope System Component Types', fields: [
+    { id:'systemComponents', type:'table-list', label:'Identify all types of system components in scope', minRows:3, columns:[
+      { id:'componentType', label:'Type of System Component', width:'26%' },
+      { id:'componentCount', label:'Total Number of System Components', type:'number', width:'16%' },
+      { id:'vendor', label:'Vendor', width:'18%' },
+      { id:'product', label:'Product Name and Version', width:'20%' },
+      { id:'role', label:'Role/Function Description', width:'20%' }
+    ] }
+  ] }
+]
+          };
+        // Normalize section 5 to use 5.1–5.3 only with detailed tables as per ROC
+        try {
+          const parts5 = structure.parts || [];
+          const first5 = parts5[0];
+          if (first5 && Array.isArray(first5.sections)) {
+            const idx5 = first5.sections.findIndex((s) => String(s.number) === '5');
+            if (idx5 !== -1) {
+              first5.sections[idx5] = {
+                number: 5,
+                heading: 'Quarterly Scan Results',
+                items: [
+                  { id: '5.1', number: '5.1', label: 'Quarterly External Scan Results', fields: [
+                    { id:'extScans', type:'table-list', label:'Identify each quarterly ASV scan performed within the last 12 months', minRows:4, columns:[
+                      { id:'date', label:'Date of the Scan(s)', type:'date', width:'18%' },
+                      { id:'asvName', label:'Name of ASV that Performed the Scan', width:'28%' },
+                      { id:'failedInitial', label:'Failed initial scan? (Yes/No)', type:'radio', options:['Yes','No'], width:'14%' },
+                      { id:'rescanDates', label:'If Failed: Date(s) of re-scans showing vulnerabilities corrected', type:'date', when:{ columnId:'failedInitial', equals:'Yes' }, width:'40%' }
+                    ] },
+                    { id:'isInitialExternal', type:'radio', label:"Indicate whether this is the assessed entity’s initial PCI DSS assessment against the ASV scan requirements", options:['Yes','No'] },
+                    { id:'initialExternalDoc', type:'text', label:"If yes, identify the document verified that includes policies/procedures requiring scanning at least once every three months going forward", when:{ fieldId:'isInitialExternal', equals:'Yes' } },
+                    { id:'externalComments', type:'textarea', label:'Assessor comments, if applicable' }
+                  ] },
+                  { id: '5.2', number: '5.2', label: 'Attestations of Scan Compliance', fields: [
+                    { id:'attestationCompleted', type:'radio', label:'Indicate whether the ASV and the assessed entity completed the Attestations of Scan Compliance (ASV Program Guide)', options:['Yes','No'] },
+                    { id:'attestationComments', type:'textarea', label:'Comments (optional)' }
+                  ] },
+                  { id: '5.3', number: '5.3', label: 'Quarterly Internal Scan Results', fields: [
+                    { id:'intScans', type:'table-list', label:'Identify each quarterly internal vulnerability scan performed within the last 12 months', minRows:4, columns:[
+                      { id:'date', label:'Date of the Scan(s)', type:'date', width:'18%' },
+                      { id:'authenticated', label:'Was the scan performed via authenticated scanning? (Yes/No)', type:'radio', options:['Yes','No'], width:'22%' },
+                      { id:'highRiskFound', label:"Any high-risk or critical vulnerabilities per the entity’s rankings (Req. 6.3.1)? (Yes/No)", type:'radio', options:['Yes','No'], width:'22%' },
+                      { id:'rescanDates', label:'If high-risk/critical found: Date(s) of re-scans showing vulnerabilities corrected', type:'date', when:{ columnId:'highRiskFound', equals:'Yes' }, width:'38%' }
+                    ] },
+                    { id:'isInitialInternal', type:'radio', label:"Indicate if this is the assessed entity’s initial PCI DSS assessment against the internal scan requirements", options:['Yes','No'] },
+                    { id:'initialInternalDoc', type:'text', label:"If yes, identify the document verified that includes policies/procedures requiring scanning at least once every three months going forward", when:{ fieldId:'isInitialInternal', equals:'Yes' } },
+                    { id:'internalComments', type:'textarea', label:'Assessor comments, if applicable' }
+                  ] }
+                ]
+              };
+            }
+          }
+        } catch {}
+
+        }
+      }
+    } catch (_) {}
+  }
+
+  try {
+    if (fw === 'PCI DSS 4.0' && structure && Array.isArray(structure.parts)) {
+      const first = structure.parts[0];
+      if (first && Array.isArray(first.sections)) {
+        const s5i = first.sections.findIndex(s => String(s.number) === '5');
+        if (s5i !== -1) {
+          const s5 = first.sections[s5i];
+          const labels = (s5.items||[]).map(it => it && it.label);
+          const looksLikePlaceholders = labels.join('|').match(/\bQ1\b|\bQ2\b|\bQ3\b|\bQ4\b/);
+          if (looksLikePlaceholders) {
+            first.sections[s5i] = {
+              number: 5,
+              heading: 'Quarterly Scan Results',
+              items: [
+                { id: '5.1', number: '5.1', label: 'Quarterly External Scan Results', fields: [
+                  { id:'extScans', type:'table-list', label:'Identify each quarterly ASV scan performed within the last 12 months', minRows:4, columns:[
+                    { id:'date', label:'Date of the Scan(s)', type:'date', width:'18%' },
+                    { id:'asvName', label:'Name of ASV that Performed the Scan', width:'28%' },
+                    { id:'failedInitial', label:'Failed initial scan? (Yes/No)', type:'radio', options:['Yes','No'], width:'14%' },
+                    { id:'rescanDates', label:'If Failed: Date(s) of re-scans showing vulnerabilities corrected', type:'date', when:{ columnId:'failedInitial', equals:'Yes' }, width:'40%' }
+                  ] },
+                  { id:'isInitialExternal', type:'radio', label:"Indicate whether this is the assessed entity’s initial PCI DSS assessment against the ASV scan requirements", options:['Yes','No'] },
+                  { id:'initialExternalDoc', type:'text', label:"If yes, identify the document verified that includes policies/procedures requiring scanning at least once every three months going forward", when:{ fieldId:'isInitialExternal', equals:'Yes' } },
+                  { id:'externalComments', type:'textarea', label:'Assessor comments, if applicable' }
+                ] },
+                { id: '5.2', number: '5.2', label: 'Attestations of Scan Compliance', fields: [
+                  { id:'attestationCompleted', type:'radio', label:'Indicate whether the ASV and the assessed entity completed the Attestations of Scan Compliance (ASV Program Guide)', options:['Yes','No'] },
+                  { id:'attestationComments', type:'textarea', label:'Comments (optional)' }
+                ] },
+                { id: '5.3', number: '5.3', label: 'Quarterly Internal Scan Results', fields: [
+                  { id:'intScans', type:'table-list', label:'Identify each quarterly internal vulnerability scan performed within the last 12 months', minRows:4, columns:[
+                    { id:'date', label:'Date of the Scan(s)', type:'date', width:'18%' },
+                    { id:'authenticated', label:'Was the scan performed via authenticated scanning? (Yes/No)', type:'radio', options:['Yes','No'], width:'22%' },
+                    { id:'highRiskFound', label:"Any high-risk or critical vulnerabilities per the entity’s rankings (Req. 6.3.1)? (Yes/No)", type:'radio', options:['Yes','No'], width:'22%' },
+                    { id:'rescanDates', label:'If high-risk/critical found: Date(s) of re-scans showing vulnerabilities corrected', type:'date', when:{ columnId:'highRiskFound', equals:'Yes' }, width:'38%' }
+                  ] },
+                  { id:'isInitialInternal', type:'radio', label:"Indicate if this is the assessed entity’s initial PCI DSS assessment against the internal scan requirements", options:['Yes','No'] },
+                  { id:'initialInternalDoc', type:'text', label:"If yes, identify the document verified that includes policies/procedures requiring scanning at least once every three months going forward", when:{ fieldId:'isInitialInternal', equals:'Yes' } },
+                  { id:'internalComments', type:'textarea', label:'Assessor comments, if applicable' }
+                ] }
+              ]
+            };
+          }
+        }
+      }
+    }
+  } catch {}
+  res.json({ success: true, framework: fw, structure });
+});
+
+// --- Export to DOCX using an existing template at /root/template ---
+// Supports custom tags like {{r Contact('Client-Name')}} inside the .docx
+// We duplicate the template and stream the filled version; the template file is never modified.
+try {
+  const fs = require('fs');
+  const path = require('path');
+  const PizZip = require('pizzip');
+  const Docxtemplater = require('docxtemplater');
+
+  function fmtDate(iso) {
+    if (!iso) return '';
+    try { return new Date(iso).toLocaleString('en-US', { year: 'numeric', month: 'short', day: '2-digit' }); } catch { return String(iso); }
+  }
+
+  // Custom parser to support tags like: r Contact('Client-Name')
+  function customParser(tag) {
+    const original = tag;
+    const t = String(tag || '').trim();
+    const m = t.match(/^r\s+([A-Za-z0-9_]+)\('([^']+)'\)\s*$/);
+    if (m) {
+      const group = m[1];
+      const key = m[2];
+      return {
+        get: (scope) => {
+          try {
+            const g = scope[group] || {};
+            const v = g[key];
+            return (v == null ? '' : v);
+          } catch { return ''; }
+        }
+      };
+
+    }
+    // Checkbox helper: cb Group('Key') -> ☑/☐ or cb(path.to.value)
+    const mcb1 = t.match(/^cb\s+([A-Za-z0-9_]+)\('([^']+)'\)\s*$/);
+    if (mcb1) {
+      const group = mcb1[1];
+      const key = mcb1[2];
+      const isTrue = (val) => {
+        try {
+          if (val === true) return true;
+          if (typeof val === 'number') return val !== 0;
+          if (typeof val === 'string') {
+            const s = val.trim().toLowerCase();
+            return ['true','yes','y','ok','1','checked','on'].includes(s);
+          }
+          return false;
+        } catch { return false; }
+      };
+      return {
+        get: (scope) => {
+          try {
+            const g = scope[group] || {};
+            return isTrue(g[key]) ? '☑' : '☐';
+          } catch { return '☐'; }
+        }
+      };
+    }
+
+    const mcb2 = t.match(/^cb\(([^)]+)\)\s*$/);
+    if (mcb2) {
+      const pathExpr = mcb2[1].trim();
+      const isTrue = (val) => {
+        try {
+          if (val === true) return true;
+          if (typeof val === 'number') return val !== 0;
+          if (typeof val === 'string') {
+            const s = val.trim().toLowerCase();
+            return ['true','yes','y','ok','1','checked','on'].includes(s);
+          }
+          return false;
+        } catch { return false; }
+      };
+      return {
+        get: (scope) => {
+          try {
+            const v = pathExpr.split('.').reduce((o, k) => (o ? o[k] : undefined), scope);
+            return isTrue(v) ? '☑' : '☐';
+          } catch { return '☐'; }
+        }
+      };
+    }
+
+    // Fallback to dotted path (e.g., assessment.title)
+    return {
+      get: (scope) => {
+        try { return t.split('.').reduce((o, k) => (o ? o[k] : undefined), scope) ?? ''; } catch { return ''; }
+      }
+    };
+  }
+
+  app.get('/assessments/:id/export.docx', (req, res) => {
+    try {
+      const { id } = req.params;
+      const templateName = (req.query.template || 'report.docx').toString();
+      const templatePath = path.resolve('/root/template', templateName);
+      if (!fs.existsSync(templatePath)) {
+        return res.status(404).json({ success:false, message:`Template not found: ${templateName}` });
+      }
+
+      const a = assessments.find(x => x.id === id);
+      if (!a) return res.status(404).json({ success:false, message:'Assessment not found' });
+      const tasks = tasksByAssessment[id] || [];
+      const messages = messagesByAssessment[id] || [];
+      const answers = (typeof answersByAssessment !== 'undefined' ? (answersByAssessment[id] || {}) : {});
+
+      
+      // Load JSON mapping file for tag -> data path resolution (ease future config)
+      let mapping = {};
+      try { mapping = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'docx-mapping.json'), 'utf8')); } catch {}
+      function deepGet(obj, pathExpr) {
+        if (!pathExpr) return '';
+        if (Array.isArray(pathExpr)) {
+          return pathExpr.reduce((o,k)=> (o ? o[k] : undefined), obj);
+        }
+        // allow escaped dots for keys like 1.1 => use 1\.1 in mapping
+        const SENT = '__DOCX_DOT__';
+        const safe = String(pathExpr).replace(/\\\./g, SENT);
+        const parts = safe.split('.').map(p => p.replace(new RegExp(SENT, 'g'), '.'));
+        return parts.reduce((o,k)=> (o ? o[k] : undefined), obj);
+      }
+      const dataModel = { assessment: a, answers, tasks, messages };
+      const groups = {};
+      try {
+        for (const g of Object.keys(mapping || {})) {
+          groups[g] = {};
+          const keys = mapping[g] || {};
+          for (const k of Object.keys(keys)) {
+            const val = deepGet(dataModel, keys[k]);
+            groups[g][k] = (val == null ? '' : val);
+          }
+        }
+      } catch {}
+      const contact = groups['Contact'] || {};
+// Normalize Contact date fields to "Mon DD, YYYY" format
+      try {        const dateKeys = ['Date-of-Report', 'Assessment-Start', 'Assessment-End', 'Onsite-Dates'];        for (const dk of dateKeys) {          const sv = contact[dk];          if (sv && /^\d{4}-\d{2}-\d{2}/.test(String(sv))) {            contact[dk] = fmtDate(sv);          }        }      } catch {}
+
+      const scope = 
+{
+        assessment: {
+          id: a.id,
+          title: a.title,
+          framework: a.framework || '',
+          col: a.col || '',
+          created: fmtDate(a.created),
+          startDate: fmtDate(a.startDate),
+          dueIn: a.dueIn || '',
+          description: a.description || ''
+        },
+        ...groups,
+        Contact: contact,
+        tasks: tasks.map(t => ({ name: t.name, status: t.status, due: t.due || '' })),
+        messages: messages.map(m => ({ user: m.user, time: m.time, text: m.text })),
+        generatedAt: fmtDate(new Date().toISOString())
+      };
+
+      const content = fs.readFileSync(templatePath, 'binary');
+      const zip = new PizZip(content);
+      const doc = new Docxtemplater(zip, { paragraphLoop: true, linebreaks: true, parser: customParser, delimiters: { start: "{{", end: "}}" } });
+      doc.setData(scope);
+      doc.render();
+      const buf = doc.getZip().generate({ type: 'nodebuffer' });
+      const safeTitle = String(a.title || 'Assessment').replace(/[^a-z0-9._-]+/gi, '_').slice(0,64);
+      const fname = `${a.id}-${safeTitle}.docx`;
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+      res.setHeader('Content-Disposition', `attachment; filename="${fname}"`);
+      return res.send(buf);
+    } catch (e) {
+      console.error('Export DOCX failed:', e);
+      return res.status(500).json({ success:false, message:'Export failed' });
+    }
+  });
+} catch (e) {
+  console.warn('DOCX export not initialized:', e && e.message);
+}
+
+
+app.get('/assessments/:id/tasks', (req,res)=>{
+  const list = tasksByAssessment[req.params.id] || []; res.json({ success:true, tasks:list });
+});
+app.post('/assessments/:id/tasks', (req,res)=>{
+  const { name, status='In Progress', due='7 Days' } = req.body || {};
+  if (!name) return res.status(400).json({ success:false, message:'name required' });
+  const id = 'T-' + Math.random().toString(36).slice(2,8);
+  const task = { id, name, status, due };
+  tasksByAssessment[req.params.id] = tasksByAssessment[req.params.id] || [];
+  tasksByAssessment[req.params.id].push(task);
+  res.status(201).json({ success:true, task }); saveData(snapshot());
+});
+app.get('/assessments/:id/messages', (req,res)=>{
+  const list = messagesByAssessment[req.params.id] || [];
+  res.json({ success:true, messages:list });
+});
+app.post('/assessments/:id/messages', (req,res)=>{
+  const { user='System', text='', parentId=null, sections=[], attachments=[], mentions=[] } = req.body || {};
+  if (!text) return res.status(400).json({ success:false, message:'text required' });
+  const msg = {
+    id:'M-' + Math.random().toString(36).slice(2,8),
+    user,
+    time: new Date().toLocaleString('en-US', { hour12:false }),
+    text,
+    parentId: parentId || null,
+    sections: Array.isArray(sections) ? sections.filter(Boolean) : [],
+    attachments: Array.isArray(attachments) ? attachments.filter(Boolean) : [],
+    mentions: Array.isArray(mentions) ? mentions.filter(Boolean) : [],
+  };
+  messagesByAssessment[req.params.id] = messagesByAssessment[req.params.id] || [];
+  messagesByAssessment[req.params.id].push(msg);
+  saveData(snapshot());
+  res.status(201).json({ success:true, message: msg });
+});
+
+function currentSnapshot() {
+  return { assessments, tasksByAssessment, messagesByAssessment, attachmentsByAssessment, users };
+}
+
+// Save to sqlite on boot
+
+// Attachments (assessment-level) and per-section linking
+// List assessment attachments
+app.get('/assessments/:id/attachments', (req,res)=>{
+  const list = attachmentsByAssessment[req.params.id] || [];
+  res.json({ success:true, attachments:list });
+});
+
+// Delete an attachment (metadata and optional file)
+app.delete('/assessments/:id/attachments/:attId', (req, res) => {
+  const { id, attId } = req.params;
+  const list = attachmentsByAssessment[id] || [];
+  const idx = list.findIndex(a => a.id === attId);
+  if (idx === -1) return res.status(404).json({ success:false, message:'Attachment not found' });
+  const removed = list.splice(idx, 1)[0];
+  attachmentsByAssessment[id] = list;
+  try { if (removed && removed.path) { fs.unlinkSync(removed.path); } } catch {}
+  saveData(snapshot());
+  res.json({ success:true, removed });
+});
+
+// Metadata-only create (name/url)
+app.post('/assessments/:id/attachments', (req, res) => {
+  const { id } = req.params;
+  const { name, url, size } = req.body || {};
+  if (!name) return res.status(400).json({ success:false, message:'name required' });
+  const att = {
+    id: 'F-' + Math.random().toString(36).slice(2,8),
+    name,
+    created: new Date().toLocaleString('en-US', { hour12:false }),
+    modified: new Date().toLocaleString('en-US', { hour12:false }),
+    size: size || '—',
+    url: url || null,
+  };
+  attachmentsByAssessment[id] = attachmentsByAssessment[id] || [];
+  attachmentsByAssessment[id].push(att);
+  saveData(snapshot());
+  res.status(201).json({ success:true, attachment: att });
+});
+
+// Binary upload (application/octet-stream) with ?filename= or x-filename header
+const UPLOAD_DIR = path.join(__dirname, 'uploads');
+app.use('/uploads', express.static(UPLOAD_DIR));
+app.post('/assessments/:id/attachments/upload', express.raw({ type: 'application/octet-stream', limit: '50mb' }), (req, res) => {
+  const { id } = req.params;
+  const filename = (req.query.filename || req.headers['x-filename'] || '').toString();
+  if (!filename || !req.body || !Buffer.isBuffer(req.body)) {
+    return res.status(400).json({ success:false, message:'filename and binary body required' });
+  }
+  const safe = filename.replace(/[^a-zA-Z0-9._-]/g, '_');
+  const dir = path.join(UPLOAD_DIR, id);
+  try { fs.mkdirSync(dir, { recursive: true }); } catch {}
+  const filePath = path.join(dir, safe);
+  try { fs.writeFileSync(filePath, req.body); } catch (e) { return res.status(500).json({ success:false, message:'Failed to write file' }); }
+  const att = {
+    id: 'F-' + Math.random().toString(36).slice(2,8),
+    name: safe,
+    created: new Date().toLocaleString('en-US', { hour12:false }),
+    modified: new Date().toLocaleString('en-US', { hour12:false }),
+    size: `${req.body.length} bytes`,
+    url: `/uploads/${id}/${encodeURIComponent(safe)}`,
+    path: filePath,
+  };
+  attachmentsByAssessment[id] = attachmentsByAssessment[id] || [];
+  attachmentsByAssessment[id].push(att);
+  saveData(snapshot());
+  res.status(201).json({ success:true, attachment: att });
+});
+
+// Section attachments - list resolved attachments for subsection
+app.get('/assessments/:id/sections/:subId/attachments', (req, res) => {
+  const { id, subId } = req.params;
+  const refs = (sectionAttachmentsByAssessment[id] || {})[subId] || [];
+  const all = attachmentsByAssessment[id] || [];
+  const set = new Set(refs);
+  const resolved = all.filter(a => set.has(a.id));
+  res.json({ success:true, ids: refs, attachments: resolved });
+});
+
+// Link/unlink attachments to a subsection via patch { add?: string[], remove?: string[] }
+app.put('/assessments/:id/sections/:subId/attachments', (req, res) => {
+  const { id, subId } = req.params;
+  const { add = [], remove = [] } = req.body || {};
+  const current = sectionAttachmentsByAssessment[id] = sectionAttachmentsByAssessment[id] || {};
+  const list = new Set(current[subId] || []);
+  // validate adds exist
+  const allIds = new Set((attachmentsByAssessment[id] || []).map(a => a.id));
+  (Array.isArray(add) ? add : []).forEach(attId => { if (allIds.has(attId)) list.add(attId); });
+  (Array.isArray(remove) ? remove : []).forEach(attId => list.delete(attId));
+  current[subId] = Array.from(list);
+  sectionAttachmentsByAssessment[id] = current;
+  saveData(snapshot());
+  const resolved = (attachmentsByAssessment[id] || []).filter(a => list.has(a.id));
+  res.json({ success:true, ids: current[subId], attachments: resolved });
+});
+
+// Unlink one attachment id
+app.delete('/assessments/:id/sections/:subId/attachments/:attId', (req, res) => {
+  const { id, subId, attId } = req.params;
+  const current = sectionAttachmentsByAssessment[id] = sectionAttachmentsByAssessment[id] || {};
+  const list = new Set(current[subId] || []);
+  const existed = list.delete(attId);
+  current[subId] = Array.from(list);
+  sectionAttachmentsByAssessment[id] = current;
+  saveData(snapshot());
+  res.json({ success:true, removed: existed ? attId : null, ids: current[subId] });
+});
+try { const sqlite = require('./db-sqlite'); if (sqlite && typeof sqlite.saveAll === 'function') { sqlite.saveAll(currentSnapshot()); } } catch (e) { console.warn('SQLite initial save skipped', e.message); }
+
+// Start server
+app.listen(3001, '0.0.0.0', () => {
+  console.log('🚀 FRESH Backend running on http://0.0.0.0:3001');
+  console.log('🔍 Health: http://95.217.190.154:3001/health');
+  console.log('🔐 Login: admin@acme.example.com / demo123!');
+});
+
+app.put('/assessments/:id', (req,res)=>{
+  const { id } = req.params;
+  const idx = assessments.findIndex(a => a.id === id);
+  if (idx === -1) return res.status(404).json({ success:false, message:'Assessment not found' });
+  const { title, col, dueIn, framework } = req.body || {};
+  if (title !== undefined) assessments[idx].title = title;
+  if (col !== undefined) assessments[idx].col = col;
+  if (dueIn !== undefined) assessments[idx].dueIn = dueIn;
+  if (framework !== undefined) assessments[idx].framework = framework;
+  res.json({ success:true, assessment: assessments[idx] }); saveData(snapshot());
+});
+
+app.delete('/assessments/:id', (req,res)=>{
+  const { id } = req.params;
+  const idx = assessments.findIndex(a => a.id === id);
+  if (idx === -1) return res.status(404).json({ success:false, message:'Assessment not found' });
+  assessments[idx].archived = true;
+  res.json({ success:true, assessment: assessments[idx] }); saveData(snapshot());
+});
+
+app.put('/assessments/:id/unarchive', (req,res)=>{
+  const { id } = req.params;
+  const idx = assessments.findIndex(a => a.id === id);
+  if (idx === -1) return res.status(404).json({ success:false, message:'Assessment not found' });
+  assessments[idx].archived = false;
+  res.json({ success:true, assessment: assessments[idx] }); saveData(snapshot());
+});
+
+app.delete('/assessments/:id/messages/:msgId', (req,res)=>{
+  const { id, msgId } = req.params;
+  const list = messagesByAssessment[id] || [];
+  const idx = list.findIndex(m => m.id === msgId);
+  if (idx === -1) return res.status(404).json({ success:false, message:'Message not found' });
+  const removed = list.splice(idx,1)[0];
+  messagesByAssessment[id] = list;
+  saveData(snapshot());
+  res.json({ success:true, removed });
+});
+
+// --- Answers API (per-assessment, per-subsection form values) ---
+// GET answers for an assessment
+app.get('/assessments/:id/answers', (req, res) => {
+  const { id } = req.params;
+  const answers = answersByAssessment[id] || {};
+  res.json({ success: true, answers });
+});
+
+// PUT answers patch: { [subsectionId]: { fieldId: value } }
+app.put('/assessments/:id/answers', (req, res) => {
+  const { id } = req.params;
+  const patch = req.body || {};
+  if (typeof patch !== 'object' || Array.isArray(patch)) {
+    return res.status(400).json({ success: false, message: 'Invalid payload' });
+  }
+  const current = (answersByAssessment[id] = answersByAssessment[id] || {});
+  for (const key of Object.keys(patch)) {
+    const value = patch[key];
+    if (value && typeof value === 'object' && !Array.isArray(value)) {
+      current[key] = { ...(current[key] || {}), ...value };
+    } else {
+      // if value is not an object, store raw value under a default field
+      current[key] = value;
+    }
+  }
+  answersByAssessment[id] = current;
+  saveData(snapshot());
+  res.json({ success: true, answers: current });
+});

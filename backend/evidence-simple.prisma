@@ -1,0 +1,73 @@
+
+// Evidence Management - Simple Version
+enum EvidenceType {
+  DOCUMENT
+  INTERVIEW
+  SAMPLING
+  CONFIGURATION
+  OTHER
+}
+
+enum EvidenceStatus {
+  DRAFT
+  IN_REVIEW
+  APPROVED
+  REJECTED
+}
+
+model Evidence {
+  id                String               @id @default(uuid()) @db.Uuid
+  orgId             String               @map("org_id") @db.Uuid
+  projectId         String?              @map("project_id") @db.Uuid
+  sectionKey        String               @map("section_key") @db.VarChar(50)
+  
+  type              EvidenceType
+  category          String               @db.VarChar(100)
+  title             String               @db.VarChar(255)
+  description       String?              @db.Text
+  referenceNumber   String?              @map("reference_number") @db.VarChar(100)
+  
+  // Document fields
+  documentName      String?              @map("document_name") @db.VarChar(255)
+  documentVersion   String?              @map("document_version") @db.VarChar(50)
+  documentPurpose   String?              @map("document_purpose") @db.Text
+  revisionDate      DateTime?            @map("revision_date") @db.Timestamptz(6)
+  
+  // Interview fields
+  interviewee       String?              @db.VarChar(255)
+  intervieweeRole   String?              @map("interviewee_role") @db.VarChar(255)
+  topicsCovered     String?              @map("topics_covered") @db.Text
+  
+  // Sampling fields
+  sampleType        String?              @map("sample_type") @db.VarChar(255)
+  selectionMethod   String?              @map("selection_method") @db.VarChar(255)
+  totalSampled      Int?                 @map("total_sampled")
+  totalPopulation   Int?                 @map("total_population")
+  
+  // System/Config fields
+  systemName        String?              @map("system_name") @db.VarChar(255)
+  configDetails     String?              @map("config_details") @db.Text
+  
+  // Metadata
+  status            EvidenceStatus       @default(DRAFT)
+  collectedBy       String               @map("collected_by") @db.Uuid
+  reviewedBy        String?              @map("reviewed_by") @db.Uuid
+  
+  // Retention
+  retentionPolicy   String?              @map("retention_policy") @db.Text
+  retentionYears    Int?                 @map("retention_years")
+  repositoryName    String?              @map("repository_name") @db.VarChar(255)
+  
+  createdAt         DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime             @updatedAt @map("updated_at") @db.Timestamptz(6)
+  
+  organization      Organization         @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  project           Project?             @relation(fields: [projectId], references: [id])
+  collector         User                 @relation("EvidenceCollector", fields: [collectedBy], references: [id])
+  reviewer          User?                @relation("EvidenceReviewer", fields: [reviewedBy], references: [id])
+  
+  @@index([orgId, type, status])
+  @@index([orgId, sectionKey])
+  @@index([referenceNumber])
+  @@map("evidence")
+}

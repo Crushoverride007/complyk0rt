@@ -1,0 +1,302 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Organization {
+  id           String        @id @default(uuid()) @db.Uuid
+  name         String        @db.VarChar(255)
+  slug         String        @unique @db.VarChar(100)
+  plan         String        @default("basic") @db.VarChar(50)
+  settings     Json          @default("{}")
+  status       String        @default("active") @db.VarChar(20)
+  createdAt    DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime      @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt    DateTime?     @map("deleted_at") @db.Timestamptz(6)
+  activityLogs ActivityLog[]
+  files        File[]
+  invitations  Invitation[]
+  memberships  Membership[]
+  projects     Project[]
+
+  @@map("organizations")
+}
+
+model User {
+  id              String        @id @default(uuid()) @db.Uuid
+  email           String        @unique @db.VarChar(255)
+  name            String        @db.VarChar(255)
+  avatarUrl       String?       @map("avatar_url") @db.VarChar(500)
+  passwordHash    String?       @map("password_hash") @db.VarChar(255)
+  emailVerified   Boolean       @default(false) @map("email_verified")
+  status          String        @default("active") @db.VarChar(20)
+  timezone        String        @default("UTC") @db.VarChar(50)
+  locale          String        @default("en") @db.VarChar(10)
+  lastLoginAt     DateTime?     @map("last_login_at") @db.Timestamptz(6)
+  createdAt       DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime      @updatedAt @map("updated_at") @db.Timestamptz(6)
+  activityLogs    ActivityLog[] @relation("ActivityActor")
+  uploadedFiles   File[]        @relation("FileUploader")
+  sentInvitations Invitation[]  @relation("InvitationSender")
+  memberships     Membership[]
+  ownedProjects   Project[]     @relation("ProjectOwner")
+  assignedTasks   Task[]        @relation("TaskAssignee")
+  reportedTasks   Task[]        @relation("TaskReporter")
+
+  @@map("users")
+}
+
+model Membership {
+  id           String       @id @default(uuid()) @db.Uuid
+  userId       String       @map("user_id") @db.Uuid
+  orgId        String       @map("org_id") @db.Uuid
+  role         String       @db.VarChar(20)
+  status       String       @default("active") @db.VarChar(20)
+  joinedAt     DateTime     @default(now()) @map("joined_at") @db.Timestamptz(6)
+  updatedAt    DateTime     @updatedAt @map("updated_at") @db.Timestamptz(6)
+  organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, orgId])
+  @@map("memberships")
+}
+
+model Project {
+  id           String       @id @default(uuid()) @db.Uuid
+  orgId        String       @map("org_id") @db.Uuid
+  name         String       @db.VarChar(255)
+  description  String?
+  status       String       @default("backlog") @db.VarChar(20)
+  priority     String       @default("medium") @db.VarChar(10)
+  ownerId      String       @map("owner_id") @db.Uuid
+  frameworkId  String?      @map("framework_id") @db.Uuid
+  metadata     Json         @default("{}")
+  startDate    DateTime?    @map("start_date") @db.Date
+  dueDate      DateTime?    @map("due_date") @db.Date
+  completedAt  DateTime?    @map("completed_at") @db.Timestamptz(6)
+  createdAt    DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime     @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt    DateTime?    @map("deleted_at") @db.Timestamptz(6)
+  files        File[]
+  organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  owner        User         @relation("ProjectOwner", fields: [ownerId], references: [id])
+  tasks        Task[]
+
+  @@index([orgId, status])
+  @@index([orgId, ownerId])
+  @@map("projects")
+}
+
+model Task {
+  id            String    @id @default(uuid()) @db.Uuid
+  projectId     String    @map("project_id") @db.Uuid
+  title         String    @db.VarChar(255)
+  description   String?
+  status        String    @default("backlog") @db.VarChar(20)
+  priority      String    @default("medium") @db.VarChar(10)
+  assigneeId    String?   @map("assignee_id") @db.Uuid
+  reporterId    String    @map("reporter_id") @db.Uuid
+  sectionKey    String?   @map("section_key") @db.VarChar(100)
+  labels        Json      @default("[]")
+  estimateHours Int?      @map("estimate_hours")
+  actualHours   Int?      @map("actual_hours")
+  dueDate       DateTime? @map("due_date") @db.Date
+  completedAt   DateTime? @map("completed_at") @db.Timestamptz(6)
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt     DateTime? @map("deleted_at") @db.Timestamptz(6)
+  files         File[]
+  assignee      User?     @relation("TaskAssignee", fields: [assigneeId], references: [id])
+  project       Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  reporter      User      @relation("TaskReporter", fields: [reporterId], references: [id])
+
+  @@index([projectId, status])
+  @@index([projectId, assigneeId])
+  @@index([projectId, sectionKey])
+  @@map("tasks")
+}
+
+model File {
+  id           String       @id @default(uuid()) @db.Uuid
+  orgId        String       @map("org_id") @db.Uuid
+  projectId    String?      @map("project_id") @db.Uuid
+  taskId       String?      @map("task_id") @db.Uuid
+  sectionKey   String?      @map("section_key") @db.VarChar(100)
+  name         String       @db.VarChar(255)
+  path         String       @db.VarChar(500)
+  size         BigInt
+  mimeType     String       @map("mime_type") @db.VarChar(100)
+  hashSha256   String       @map("hash_sha256") @db.VarChar(64)
+  tags         Json         @default("[]")
+  metadata     Json         @default("{}")
+  uploadedBy   String       @map("uploaded_by") @db.Uuid
+  scanStatus   String       @default("pending") @map("scan_status") @db.VarChar(20)
+  scanResult   Json         @default("{}") @map("scan_result")
+  createdAt    DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  deletedAt    DateTime?    @map("deleted_at") @db.Timestamptz(6)
+  organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  project      Project?     @relation(fields: [projectId], references: [id])
+  task         Task?        @relation(fields: [taskId], references: [id])
+  uploader     User         @relation("FileUploader", fields: [uploadedBy], references: [id])
+
+  @@index([orgId, projectId])
+  @@index([orgId, sectionKey])
+  @@index([hashSha256])
+  @@map("files")
+}
+
+model ActivityLog {
+  id           String       @id @default(uuid()) @db.Uuid
+  orgId        String       @map("org_id") @db.Uuid
+  actorId      String?      @map("actor_id") @db.Uuid
+  action       String       @db.VarChar(100)
+  targetType   String       @map("target_type") @db.VarChar(50)
+  targetId     String       @map("target_id") @db.Uuid
+  targetName   String?      @map("target_name") @db.VarChar(255)
+  payload      Json         @default("{}")
+  ipAddress    String?      @map("ip_address") @db.Inet
+  userAgent    String?      @map("user_agent")
+  createdAt    DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  actor        User?        @relation("ActivityActor", fields: [actorId], references: [id])
+  organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@index([orgId, createdAt(sort: Desc)])
+  @@index([orgId, actorId, createdAt(sort: Desc)])
+  @@index([orgId, targetType, targetId, createdAt(sort: Desc)])
+  @@map("activity_logs")
+}
+
+model Invitation {
+  id           String       @id @default(uuid()) @db.Uuid
+  orgId        String       @map("org_id") @db.Uuid
+  email        String       @db.VarChar(255)
+  role         String       @db.VarChar(20)
+  token        String       @unique @db.VarChar(255)
+  invitedBy    String       @map("invited_by") @db.Uuid
+  status       String       @default("pending") @db.VarChar(20)
+  expiresAt    DateTime     @map("expires_at") @db.Timestamptz(6)
+  acceptedAt   DateTime?    @map("accepted_at") @db.Timestamptz(6)
+  createdAt    DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  inviter      User         @relation("InvitationSender", fields: [invitedBy], references: [id])
+  organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@index([orgId, status])
+  @@index([token])
+  @@map("invitations")
+}
+
+// Evidence Management Models for Section 6: Sampling and Evidence
+
+model Evidence {
+  id                String               @id @default(uuid()) @db.Uuid
+  orgId             String               @map("org_id") @db.Uuid
+  assessmentId      String?              @map("assessment_id") @db.Uuid
+  projectId         String?              @map("project_id") @db.Uuid
+  sectionKey        String               @map("section_key") @db.VarChar(50)
+  
+  // Evidence Types
+  type              EvidenceType         // DOCUMENT, INTERVIEW, SAMPLING, CONFIGURATION, OTHER
+  category          String               @db.VarChar(100) // Evidence Retention, Sampling, etc.
+  
+  // Core Fields
+  title             String               @db.VarChar(255)
+  description       String?              @db.Text
+  referenceNumber   String?              @map("reference_number") @db.VarChar(100)
+  
+  // Document-specific fields
+  documentName      String?              @map("document_name") @db.VarChar(255)
+  documentVersion   String?              @map("document_version") @db.VarChar(50)
+  documentPurpose   String?              @map("document_purpose") @db.Text
+  revisionDate      DateTime?            @map("revision_date") @db.Timestamptz(6)
+  
+  // Interview-specific fields
+  interviewee       String?              @db.VarChar(255)
+  intervieweeRole   String?              @map("interviewee_role") @db.VarChar(255)
+  topicsCovered     String?              @map("topics_covered") @db.Text
+  
+  // Sampling-specific fields
+  sampleType        String?              @map("sample_type") @db.VarChar(255)
+  selectionMethod   String?              @map("selection_method") @db.VarChar(255)
+  totalSampled      Int?                 @map("total_sampled")
+  totalPopulation   Int?                 @map("total_population")
+  sampleSetRef      String?              @map("sample_set_ref") @db.VarChar(100)
+  
+  // Configuration/System evidence
+  systemName        String?              @map("system_name") @db.VarChar(255)
+  configDetails     String?              @map("config_details") @db.Text
+  
+  // Metadata
+  status            EvidenceStatus       @default(DRAFT) // DRAFT, IN_REVIEW, APPROVED, REJECTED
+  collectedBy       String               @map("collected_by") @db.Uuid
+  reviewedBy        String?              @map("reviewed_by") @db.Uuid
+  approvedBy        String?              @map("approved_by") @db.Uuid
+  
+  // Retention info
+  retentionPolicy   String?              @map("retention_policy") @db.Text
+  retentionYears    Int?                 @map("retention_years")
+  repositoryName    String?              @map("repository_name") @db.VarChar(255)
+  securityControls  String?              @map("security_controls") @db.Text
+  
+  createdAt         DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime             @updatedAt @map("updated_at") @db.Timestamptz(6)
+  
+  // Relations
+  organization      Organization         @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  project           Project?             @relation(fields: [projectId], references: [id])
+  collector         User                 @relation("EvidenceCollector", fields: [collectedBy], references: [id])
+  reviewer          User?                @relation("EvidenceReviewer", fields: [reviewedBy], references: [id])
+  approver          User?                @relation("EvidenceApprover", fields: [approvedBy], references: [id])
+  files             File[]               @relation("EvidenceFiles")
+  
+  @@index([orgId, type, status])
+  @@index([orgId, sectionKey])
+  @@index([orgId, assessmentId])
+  @@index([referenceNumber])
+  @@map("evidence")
+}
+
+model SampleSet {
+  id                String               @id @default(uuid()) @db.Uuid
+  orgId             String               @map("org_id") @db.Uuid
+  evidenceId        String               @map("evidence_id") @db.Uuid
+  
+  referenceNumber   String               @map("reference_number") @db.VarChar(100)
+  sampleType        String               @map("sample_type") @db.VarChar(255)
+  description       String?              @db.Text
+  selectionMethod   String               @map("selection_method") @db.VarChar(255)
+  totalSampled      Int                  @map("total_sampled")
+  totalPopulation   Int                  @map("total_population")
+  
+  // Sample items details (JSON array)
+  sampleItems       Json                 @map("sample_items") @default("[]")
+  
+  createdAt         DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime             @updatedAt @map("updated_at") @db.Timestamptz(6)
+  
+  // Relations
+  organization      Organization         @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  evidence          Evidence             @relation(fields: [evidenceId], references: [id], onDelete: Cascade)
+  
+  @@index([orgId, referenceNumber])
+  @@index([evidenceId])
+  @@map("sample_sets")
+}
+
+enum EvidenceType {
+  DOCUMENT
+  INTERVIEW
+  SAMPLING
+  CONFIGURATION
+  OTHER
+}
+
+enum EvidenceStatus {
+  DRAFT
+  IN_REVIEW
+  APPROVED
+  REJECTED
+}

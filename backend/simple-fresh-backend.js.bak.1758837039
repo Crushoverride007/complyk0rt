@@ -1,0 +1,643 @@
+const express = require('express');
+const cors = require('cors');
+const fs = require('fs');
+const path = require('path');
+const app = express();
+const DATA_FILE = path.join(__dirname, 'data.json');
+function loadData() {
+  try {
+    const raw = fs.readFileSync(DATA_FILE, 'utf8');
+    return JSON.parse(raw);
+  } catch (e) { return null; }
+}
+function saveData(data) {
+  try { fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2)); } catch (e) { console.error('Failed to save data', e); }
+}
+
+// In-memory demo users
+const users = [
+  { id: '1', email: 'admin@acme.example.com', name: 'Admin User', role: 'admin', active: true },
+  { id: '2', email: 'manager@acme.example.com', name: 'Manager User', role: 'manager', active: true },
+];
+const tokenToEmail = new Map();
+
+// In-memory assessments & related data
+function isoDaysAgo(n){ const d=new Date(); d.setDate(d.getDate()-n); return d.toISOString(); }
+const assessments = [
+  { id: 'A-001', title: 'Assessment/ Project Name', col: 'backlog',    dueIn: '1 Days', framework: 'PCI DSS 3.2.1',            created: isoDaysAgo(12) },
+  { id: 'A-002', title: 'Assessment/ Project Name', col: 'inprogress', dueIn: '2 Days', framework: 'PCI DSS 4.0',              created: isoDaysAgo(9)  },
+  { id: 'A-003', title: 'Assessment/ Project Name', col: 'review',     dueIn: '3 Days', framework: 'ISO/IEC 27001:2013',       created: isoDaysAgo(20) },
+  { id: 'A-004', title: 'Assessment/ Project Name', col: 'finished',   dueIn: 'Complete', framework: 'SOC 2 Type II',          created: isoDaysAgo(35) },
+];
+
+const tasksByAssessment = {
+  'A-001': [
+    { id: 'T-1001', name:'Project planning Syncup 1.1', status:'In Progress', due:'3 Days' },
+    { id: 'T-1002', name:'Requirement 1.1', status:'Completed', due:'7 Days' },
+  ],
+  'A-002': [],
+  'A-003': [],
+  'A-004': [],
+};
+
+// Messages (supports threads and tags)
+// Message shape: { id, user, time, text, parentId?: string|null, sections?: string[], attachments?: string[] }
+const messagesByAssessment = {
+  'A-001': [
+    { id:'M-1', user:'Lee, Jason', time:'Nov 11, 2020 12:05 PM', text:'When can I expect the final evidences for request 1?', sections:['1.1'] },
+    { id:'M-2', user:'Beckham, Victoria', time:'Nov 12, 2020 05:34 PM', text:'We are working with the vendors on this. We should be able to send it by tomorrow.', parentId:'M-1' },
+  ]
+};
+
+const attachmentsByAssessment = {
+  'A-001': [
+    { id:'F-1', name:'Finalized Evidence', created:'May 1, 2020 15:00:00 AM', modified:'May 14, 2019 15:00:00 AM', size:'1 Item' },
+    { id:'F-2', name:'Evidence1 Version 1.doc', created:'Nov 13, 2020 12:01:05 AM', modified:'Nov 13, 2020 12:01:05 AM', size:'10 MB' },
+  ]
+};
+
+// Section attachments mapping: { [assessmentId]: { [subsectionId]: [attachmentId] } }
+const sectionAttachmentsByAssessment = {
+  // example: 'A-002': { '1.1': ['F-abc'] }
+};
+
+// Answers store: { [assessmentId]: { [subsectionId]: { fieldId: value } } }
+const answersByAssessment = {
+  'A-002': {
+    '1.1': { companyName: 'ABC Inc.', companyAddress: '320, Petro Avenue Ln', assessorCompany: 'ABC Inc.' }
+  }
+};
+
+// Framework structures (minimal demo). Keyed by the value stored in assessment.framework
+// For production, prefer stable framework codes (e.g., pci-dss-4-0) and a dedicated /frameworks API.
+const frameworkStructures = {
+  'PCI DSS 4.0': {
+    code: 'pci-dss-4-0',
+    parts: [
+      {
+        title: 'Part I: Assessment Overview',
+        sections: [
+          {
+            number: 1,
+            heading: 'Contact Information and Summary of Results',
+            items: [
+              { id: '1.1', number: '1.1', label: 'Contact Information', fields: [ { id:'companyName', type:'text', label:'Company name', required:true }, { id:'companyAddress', type:'text', label:'Company address', required:true }, { id:'assessorCompany', type:'text', label:'Assessor Company' }, { id:'notes', type:'textarea', label:'Notes' } ] },
+              { id: '1.2', number: '1.2', label: 'Date and timeframe of', fields: [ { id:'timeframe', type:'text', label:'Assessment timeframe' } ] },
+              { id: '1.3', number: '1.3', label: 'PCI DSS version' },
+              { id: '1.4', number: '1.4', label: 'Additional services provided' },
+              { id: '1.5', number: '1.5', label: 'Summary of Findings' },
+            ],
+          },
+          {
+            number: 2,
+            heading: 'Business Overview',
+            items: [
+              { id: '2.1', number: '2.1', label: 'Business description' },
+              { id: '2.2', number: '2.2', label: 'Organizational structure', fields: [ { id:'orgStructure', type:'textarea', label:'Organizational structure' }, { id:'orgChartLink', type:'text', label:'Org chart link (optional)' } ] },
+              { id: '2.3', number: '2.3', label: 'Products and services', fields: [ { id:'productsServices', type:'textarea', label:'Products and services offered' } ] },
+              { id: '2.4', number: '2.4', label: 'Locations and channels', fields: [ { id:'locations', type:'textarea', label:'Locations' }, { id:'channels', type:'textarea', label:'Sales/Service channels' } ] },
+            ],
+          },
+          {
+            number: 3,
+            heading: 'Description of Scope of Work and Approach Taken',
+            items: [
+              { id: '3.1', number: '3.1', label: "Assessor's validation of", fields: [ { id:'validationMethod', type:'textarea', label:"Assessor's validation method" } ] },
+              { id: '3.2', number: '3.2', label: 'Cardholder Data', fields: [ { id:'chdStorage', type:'textarea', label:'Cardholder data storage and flows' } ] },
+              { id: '3.3', number: '3.3', label: 'Network segmentation', fields: [ { id:'segmentation', type:'textarea', label:'Segmentation approach' } ] },
+              { id: '3.4', number: '3.4', label: 'Network segment details', fields: [ { id:'segmentDetails', type:'textarea', label:'Segment details' } ] },
+            ],
+          },
+          {
+            number: 4,
+            heading: 'Details about Reviewed Environment',
+            items: [
+              { id: '4.1', number: '4.1', label: 'System components', fields: [ { id:'components', type:'textarea', label:'System components' } ] },
+              { id: '4.2', number: '4.2', label: 'In-scope applications', fields: [ { id:'apps', type:'textarea', label:'In-scope applications' } ] },
+              { id: '4.3', number: '4.3', label: 'Payment channels', fields: [ { id:'paymentChannels', type:'textarea', label:'Payment channels' } ] },
+              { id: '4.4', number: '4.4', label: 'Third-party service providers', fields: [ { id:'tpsps', type:'textarea', label:'Third-party service providers' } ] },
+            ],
+          },
+          {
+            number: 5,
+            heading: 'Quarterly Scan Results',
+            items: [
+              { id: '5.1', number: '5.1', label: 'Q1' },
+              { id: '5.2', number: '5.2', label: 'Q2' },
+              { id: '5.3', number: '5.3', label: 'Q3' },
+              { id: '5.4', number: '5.4', label: 'Q4' },
+            ],
+          },
+        ],
+      },
+      {
+        title: 'Part II: Sampling and Evidence, Findings and Observations',
+        sections: [
+          {
+            number: 6,
+            heading: 'Sampling and Evidence',
+            items: [
+              { id: '6.1', number: '6.1', label: 'Sampling approach' },
+              { id: '6.2', number: '6.2', label: 'Evidence collected' },
+              { id: '6.3', number: '6.3', label: 'Sampled entities' },
+              { id: '6.4', number: '6.4', label: 'Deviations' },
+            ],
+          },
+          {
+            number: 7,
+            heading: 'Findings and Observations',
+            items: [
+              { id: '7.1', number: '7.1', label: 'Build and Maintain a Secure Network and Systems' },
+              { id: '7.2', number: '7.2', label: 'Protect Account Data' },
+              { id: '7.3', number: '7.3', label: 'Maintain a Vulnerability Management Program' },
+              { id: '7.4', number: '7.4', label: 'Implement Strong Access Control Measures' },
+              { id: '7.5', number: '7.5', label: 'Regularly Monitor and Test Networks' },
+              { id: '7.6', number: '7.6', label: 'Maintain an Information Security Policy' },
+              { id: 'APP-A', number: null, label: 'Appendix A: Additional PCI DSS Requirements' },
+              { id: 'APP-B', number: null, label: 'Appendix B: Compensating Controls' },
+              { id: 'APP-C', number: null, label: 'Appendix C: Compensating Controls Worksheet' },
+              { id: 'APP-D', number: null, label: 'Appendix D: Customized Approach' },
+              { id: 'APP-E', number: null, label: 'Appendix E: Customized Approach Template' },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  'PCI DSS 3.2.1': {
+    code: 'pci-dss-3-2-1',
+    parts: [
+      {
+        title: 'Part I: Assessment Overview',
+        sections: [
+          { number: 1, heading: 'Contact Information and Report', items: [
+            { id:'1.1', number:'1.1', label:'Contact Information' },
+            { id:'1.2', number:'1.2', label:'Date and timeframe of' },
+            { id:'1.3', number:'1.3', label:'PCI DSS version' },
+            { id:'1.4', number:'1.4', label:'Additional services provided' },
+            { id:'1.5', number:'1.5', label:'Summary of Findings' },
+          ]},
+          { number: 2, heading: 'Summary Overview', items: [
+            { id:'2.1', number:'2.1', label:"Description of the entity's" },
+            { id:'2.2', number:'2.2', label:'High-level network diagram' },
+          ]},
+        ],
+      },
+    ],
+  },
+};
+
+
+
+// Load persisted data if available
+const persisted = loadData();
+if (persisted) {
+  if (persisted.sectionAttachmentsByAssessment) Object.assign(sectionAttachmentsByAssessment, persisted.sectionAttachmentsByAssessment);
+  if (Array.isArray(persisted.assessments)) { assessments.length = 0; persisted.assessments.forEach(a=>assessments.push(a)); }
+  if (Array.isArray(persisted.users)) { users.length = 0; persisted.users.forEach(u=>users.push(u)); }
+  if (persisted.tasksByAssessment) Object.assign(tasksByAssessment, persisted.tasksByAssessment);
+  if (persisted.messagesByAssessment) Object.assign(messagesByAssessment, persisted.messagesByAssessment);
+  if (persisted.attachmentsByAssessment) Object.assign(attachmentsByAssessment, persisted.attachmentsByAssessment);
+  if (persisted.answersByAssessment) Object.assign(answersByAssessment, persisted.answersByAssessment);
+}
+// CORS & JSON
+app.use(cors({ origin: '*', methods: ['GET','POST','PUT','DELETE','OPTIONS'], allowedHeaders: ['Content-Type','Authorization'] }));
+app.use(express.json());
+
+function snapshot() {
+  return { assessments, tasksByAssessment, messagesByAssessment, attachmentsByAssessment, answersByAssessment, sectionAttachmentsByAssessment };
+}
+
+// Periodic save
+setInterval(()=> saveData(snapshot()), 10000);
+
+// Health
+app.get('/health', (req,res)=> res.json({ status:'OK', message:'Backend running!' }));
+
+// Auth
+app.post('/login', (req, res) => {
+  const { email, password } = req.body || {};
+  const isValid = (
+    (email === 'admin@acme.example.com' && password === 'demo123!') ||
+    (email === 'manager@acme.example.com' && password === 'demo123!')
+  );
+  if (!isValid) return res.status(401).json({ success:false, message:'Invalid credentials' });
+  const found = users.find(u => u.email === email);
+  const token = 'demo_token_' + Math.random().toString(36).slice(2);
+  tokenToEmail.set(token, email);
+  res.json({ success:true, token, user: found });
+});
+
+app.get('/me', (req, res) => {
+  const auth = req.headers.authorization || '';
+  const token = auth.startsWith('Bearer ') ? auth.slice(7) : null;
+  if (!token || !tokenToEmail.has(token)) return res.status(401).json({ success:false, message:'Unauthorized' });
+  const email = tokenToEmail.get(token);
+  const user = users.find(u => u.email === email);
+  if (!user) return res.status(404).json({ success:false, message:'User not found' });
+  res.json({ success:true, user });
+});
+
+
+// --- Compatibility aliases for frontend client ---
+// Auth login: returns { success, data: { user, token } }
+app.post('/api/auth/login', (req, res) => {
+  const { email, password } = req.body || {};
+  const isValid = (
+    (email === 'admin@acme.example.com' && password === 'demo123!') ||
+    (email === 'manager@acme.example.com' && password === 'demo123!')
+  );
+  if (!isValid) return res.status(401).json({ success:false, message:'Invalid credentials' });
+  const found = users.find(u => u.email === email);
+  const token = 'demo_token_' + Math.random().toString(36).slice(2);
+  tokenToEmail.set(token, email);
+  res.json({ success:true, data: { user: found, token } });
+});
+
+// Auth me: returns { success, data: user }
+app.get('/api/auth/me', (req, res) => {
+  const auth = req.headers.authorization || '';
+  const token = auth.startsWith('Bearer ') ? auth.slice(7) : null;
+  if (!token || !tokenToEmail.has(token)) return res.status(401).json({ success:false, message:'Unauthorized' });
+  const email = tokenToEmail.get(token);
+  const user = users.find(u => u.email === email);
+  if (!user) return res.status(404).json({ success:false, message:'User not found' });
+  res.json({ success:true, data: user });
+});
+
+// Users aliases
+app.get('/api/users', (req,res)=> res.json({ success:true, data: users }));
+app.post('/api/users', (req,res)=>{
+  const { email, name, role='member' } = req.body || {};
+  if (!email || !name) return res.status(400).json({ success:false, message:'email and name required' });
+  if (users.some(u=>u.email===email)) return res.status(409).json({ success:false, message:'email exists' });
+  const id = String(users.length ? Math.max(...users.map(u=>Number(u.id||0)||0))+1 : 1);
+  const user = { id, email, name, role, active:true };
+  users.push(user);
+  res.status(201).json({ success:true, data: user });
+});
+app.put('/api/users/:id', (req,res)=>{
+  const { id } = req.params; const idx = users.findIndex(u=>String(u.id)===String(id));
+  if (idx===-1) return res.status(404).json({ success:false, message:'not found' });
+  const { name, role, active } = req.body || {};
+  users[idx] = { ...users[idx], ...(name!==undefined?{name}:{}), ...(role!==undefined?{role}:{}), ...(active!==undefined?{active}:{}) };
+  res.json({ success:true, data: users[idx] });
+});
+app.delete('/api/users/:id', (req,res)=>{
+  const idx = users.findIndex(u=>String(u.id)===String(req.params.id));
+  if (idx===-1) return res.status(404).json({ success:false, message:'not found' });
+  users[idx].active = false; res.json({ success:true, data: users[idx] });
+});
+
+// Dashboard overview alias
+app.get('/api/dashboard/overview', (req,res)=>{
+  res.json({ success:true, data: {
+    totalControls: 100,
+    completedControls: 85,
+    pendingEvidences: 15,
+    upcomingAudits: 2,
+    recentActivity: [
+      { id: '1', description: 'SOX Control evidence uploaded', user: 'Admin User', timestamp: new Date().toISOString(), type:'evidence_uploaded' },
+      { id: '2', description: 'Access Control policy updated', user: 'Manager User', timestamp: new Date().toISOString(), type:'control_updated' }
+    ],
+    controlsOverview: []
+  }});
+});
+
+// Dashboard sample
+app.get('/dashboard', (req, res) => {
+  res.json({
+    user: users[0],
+    stats: { totalControls: 100, completedControls: 85, pendingEvidences: 15, upcomingAudits: 2 },
+    recentActivity: [
+      { id: '1', type: 'evidence_uploaded', description: 'SOX Control evidence uploaded', timestamp: '2h ago', user: 'Admin User' },
+      { id: '2', type: 'control_updated', description: 'Access Control policy updated', timestamp: '4h ago', user: 'Manager User' },
+    ],
+    controlsOverview: []
+  });
+});
+
+// Users
+app.get('/users', (req,res)=> res.json({ success:true, users }));
+app.post('/users', (req,res)=>{
+  const { email, name, role='member' } = req.body || {};
+  if (!email || !name) return res.status(400).json({ success:false, message:'email and name required' });
+  if (users.some(u=>u.email===email)) return res.status(409).json({ success:false, message:'email exists' });
+  const id = String(users.length ? Math.max(...users.map(u=>Number(u.id)))+1 : 1);
+  const user = { id, email, name, role, active:true };
+  users.push(user);
+  res.status(201).json({ success:true, user }); saveData(snapshot());
+});
+app.put('/users/:id', (req,res)=>{
+  const { id } = req.params; const idx = users.findIndex(u=>u.id===id);
+  if (idx===-1) return res.status(404).json({ success:false, message:'not found' });
+  const { name, role, active } = req.body || {};
+  users[idx] = { ...users[idx], ...(name!==undefined?{name}:{}), ...(role!==undefined?{role}:{}), ...(active!==undefined?{active}:{}) };
+  res.json({ success:true, user: users[idx] }); saveData(snapshot());
+});
+app.delete('/users/:id', (req,res)=>{
+  const idx = users.findIndex(u=>u.id===req.params.id);
+  if (idx===-1) return res.status(404).json({ success:false, message:'not found' });
+  users[idx].active = false; res.json({ success:true, user: users[idx] }); saveData(snapshot()); saveData(snapshot());
+});
+
+// Assessments
+app.get('/assessments', (req,res)=> {
+  const q = (req.query.archived||'').toString();
+  let list = assessments;
+  if (q === 'true') list = assessments.filter(a => !!a.archived);
+  else if (q === 'all') list = assessments;
+  else list = assessments.filter(a => !a.archived);
+  // Ensure created field exists for each assessment
+  const nowIso = new Date().toISOString();
+  list.forEach(a => { if (!a.created) a.created = nowIso; });
+  res.json({ success:true, assessments: list });
+});
+app.post('/assessments', (req,res)=>{
+  const { title, col='backlog', dueIn='7 Days', framework='PCI DSS 3.2.1', created } = req.body || {};
+  if (!title) return res.status(400).json({ success:false, message:'title required' });
+  const maxNum = assessments.reduce((m,a)=>{
+    const n = Number((a.id||'').split('-')[1]);
+    return isNaN(n) ? m : Math.max(m, n);
+  }, 0);
+  const id = 'A-' + String(maxNum + 1).padStart(3,'0');
+  const a = { id, title, col, dueIn, framework, archived: false, created: created || new Date().toISOString() };
+  assessments.push(a);
+  tasksByAssessment[id] = [];
+  messagesByAssessment[id] = [];
+  attachmentsByAssessment[id] = [];
+  res.status(201).json({ success:true, assessment:a }); saveData(snapshot());
+});
+
+// Archive or hard delete
+app.delete('/assessments/:id', (req,res)=>{
+  const { id } = req.params;
+  const hard = (req.query.hard === 'true' || req.query.hard === '1');
+  const idx = assessments.findIndex(a=>a.id===id);
+  if (idx === -1) return res.status(404).json({ success:false, message:'Assessment not found' });
+  if (hard) {
+    const removed = assessments.splice(idx,1)[0];
+    delete tasksByAssessment[id];
+    delete messagesByAssessment[id];
+    delete attachmentsByAssessment[id];
+    if (typeof answersByAssessment !== 'undefined') delete answersByAssessment[id];
+    if (typeof sectionAttachmentsByAssessment !== 'undefined') delete sectionAttachmentsByAssessment[id];
+    saveData(snapshot());
+    return res.json({ success:true, removed });
+  } else {
+    assessments[idx].archived = true;
+    saveData(snapshot());
+    return res.json({ success:true, assessment: assessments[idx] });
+  }
+});
+
+// Unarchive
+app.put('/assessments/:id/unarchive', (req,res)=>{
+  const { id } = req.params;
+  const idx = assessments.findIndex(a=>a.id===id);
+  if (idx === -1) return res.status(404).json({ success:false, message:'Assessment not found' });
+  assessments[idx].archived = false;
+  saveData(snapshot());
+  res.json({ success:true, assessment: assessments[idx] });
+});
+
+app.get('/assessments/:id', (req,res)=>{
+  const a = assessments.find(x=>x.id===req.params.id);
+  if (!a) return res.status(404).json({ success:false, message:'Assessment not found' });
+  res.json({ success:true, assessment:a });
+});
+
+// Framework-resolved structure for an assessment
+app.get('/assessments/:id/structure', (req, res) => {
+  const a = assessments.find(x => x.id === req.params.id);
+  if (!a) return res.status(404).json({ success:false, message:'Assessment not found' });
+  const fw = a.framework || 'PCI DSS 4.0';
+  const structure = frameworkStructures[fw];
+  if (!structure) return res.status(404).json({ success:false, message:`No structure defined for framework: ${fw}` });
+  res.json({ success:true, framework: fw, structure });
+});
+
+app.get('/assessments/:id/tasks', (req,res)=>{
+  const list = tasksByAssessment[req.params.id] || []; res.json({ success:true, tasks:list });
+});
+app.post('/assessments/:id/tasks', (req,res)=>{
+  const { name, status='In Progress', due='7 Days' } = req.body || {};
+  if (!name) return res.status(400).json({ success:false, message:'name required' });
+  const id = 'T-' + Math.random().toString(36).slice(2,8);
+  const task = { id, name, status, due };
+  tasksByAssessment[req.params.id] = tasksByAssessment[req.params.id] || [];
+  tasksByAssessment[req.params.id].push(task);
+  res.status(201).json({ success:true, task }); saveData(snapshot());
+});
+app.get('/assessments/:id/messages', (req,res)=>{
+  const list = messagesByAssessment[req.params.id] || [];
+  res.json({ success:true, messages:list });
+});
+app.post('/assessments/:id/messages', (req,res)=>{
+  const { user='System', text='', parentId=null, sections=[], attachments=[], mentions=[] } = req.body || {};
+  if (!text) return res.status(400).json({ success:false, message:'text required' });
+  const msg = {
+    id:'M-' + Math.random().toString(36).slice(2,8),
+    user,
+    time: new Date().toLocaleString('en-US', { hour12:false }),
+    text,
+    parentId: parentId || null,
+    sections: Array.isArray(sections) ? sections.filter(Boolean) : [],
+    attachments: Array.isArray(attachments) ? attachments.filter(Boolean) : [],
+    mentions: Array.isArray(mentions) ? mentions.filter(Boolean) : [],
+  };
+  messagesByAssessment[req.params.id] = messagesByAssessment[req.params.id] || [];
+  messagesByAssessment[req.params.id].push(msg);
+  saveData(snapshot());
+  res.status(201).json({ success:true, message: msg });
+});
+
+function currentSnapshot() {
+  return { assessments, tasksByAssessment, messagesByAssessment, attachmentsByAssessment, users };
+}
+
+// Save to sqlite on boot
+
+// Attachments (assessment-level) and per-section linking
+// List assessment attachments
+app.get('/assessments/:id/attachments', (req,res)=>{
+  const list = attachmentsByAssessment[req.params.id] || [];
+  res.json({ success:true, attachments:list });
+});
+
+// Delete an attachment (metadata and optional file)
+app.delete('/assessments/:id/attachments/:attId', (req, res) => {
+  const { id, attId } = req.params;
+  const list = attachmentsByAssessment[id] || [];
+  const idx = list.findIndex(a => a.id === attId);
+  if (idx === -1) return res.status(404).json({ success:false, message:'Attachment not found' });
+  const removed = list.splice(idx, 1)[0];
+  attachmentsByAssessment[id] = list;
+  try { if (removed && removed.path) { fs.unlinkSync(removed.path); } } catch {}
+  saveData(snapshot());
+  res.json({ success:true, removed });
+});
+
+// Metadata-only create (name/url)
+app.post('/assessments/:id/attachments', (req, res) => {
+  const { id } = req.params;
+  const { name, url, size } = req.body || {};
+  if (!name) return res.status(400).json({ success:false, message:'name required' });
+  const att = {
+    id: 'F-' + Math.random().toString(36).slice(2,8),
+    name,
+    created: new Date().toLocaleString('en-US', { hour12:false }),
+    modified: new Date().toLocaleString('en-US', { hour12:false }),
+    size: size || '—',
+    url: url || null,
+  };
+  attachmentsByAssessment[id] = attachmentsByAssessment[id] || [];
+  attachmentsByAssessment[id].push(att);
+  saveData(snapshot());
+  res.status(201).json({ success:true, attachment: att });
+});
+
+// Binary upload (application/octet-stream) with ?filename= or x-filename header
+const UPLOAD_DIR = path.join(__dirname, 'uploads');
+app.use('/uploads', express.static(UPLOAD_DIR));
+app.post('/assessments/:id/attachments/upload', express.raw({ type: 'application/octet-stream', limit: '50mb' }), (req, res) => {
+  const { id } = req.params;
+  const filename = (req.query.filename || req.headers['x-filename'] || '').toString();
+  if (!filename || !req.body || !Buffer.isBuffer(req.body)) {
+    return res.status(400).json({ success:false, message:'filename and binary body required' });
+  }
+  const safe = filename.replace(/[^a-zA-Z0-9._-]/g, '_');
+  const dir = path.join(UPLOAD_DIR, id);
+  try { fs.mkdirSync(dir, { recursive: true }); } catch {}
+  const filePath = path.join(dir, safe);
+  try { fs.writeFileSync(filePath, req.body); } catch (e) { return res.status(500).json({ success:false, message:'Failed to write file' }); }
+  const att = {
+    id: 'F-' + Math.random().toString(36).slice(2,8),
+    name: safe,
+    created: new Date().toLocaleString('en-US', { hour12:false }),
+    modified: new Date().toLocaleString('en-US', { hour12:false }),
+    size: `${req.body.length} bytes`,
+    url: `/uploads/${id}/${encodeURIComponent(safe)}`,
+    path: filePath,
+  };
+  attachmentsByAssessment[id] = attachmentsByAssessment[id] || [];
+  attachmentsByAssessment[id].push(att);
+  saveData(snapshot());
+  res.status(201).json({ success:true, attachment: att });
+});
+
+// Section attachments - list resolved attachments for subsection
+app.get('/assessments/:id/sections/:subId/attachments', (req, res) => {
+  const { id, subId } = req.params;
+  const refs = (sectionAttachmentsByAssessment[id] || {})[subId] || [];
+  const all = attachmentsByAssessment[id] || [];
+  const set = new Set(refs);
+  const resolved = all.filter(a => set.has(a.id));
+  res.json({ success:true, ids: refs, attachments: resolved });
+});
+
+// Link/unlink attachments to a subsection via patch { add?: string[], remove?: string[] }
+app.put('/assessments/:id/sections/:subId/attachments', (req, res) => {
+  const { id, subId } = req.params;
+  const { add = [], remove = [] } = req.body || {};
+  const current = sectionAttachmentsByAssessment[id] = sectionAttachmentsByAssessment[id] || {};
+  const list = new Set(current[subId] || []);
+  // validate adds exist
+  const allIds = new Set((attachmentsByAssessment[id] || []).map(a => a.id));
+  (Array.isArray(add) ? add : []).forEach(attId => { if (allIds.has(attId)) list.add(attId); });
+  (Array.isArray(remove) ? remove : []).forEach(attId => list.delete(attId));
+  current[subId] = Array.from(list);
+  sectionAttachmentsByAssessment[id] = current;
+  saveData(snapshot());
+  const resolved = (attachmentsByAssessment[id] || []).filter(a => list.has(a.id));
+  res.json({ success:true, ids: current[subId], attachments: resolved });
+});
+
+// Unlink one attachment id
+app.delete('/assessments/:id/sections/:subId/attachments/:attId', (req, res) => {
+  const { id, subId, attId } = req.params;
+  const current = sectionAttachmentsByAssessment[id] = sectionAttachmentsByAssessment[id] || {};
+  const list = new Set(current[subId] || []);
+  const existed = list.delete(attId);
+  current[subId] = Array.from(list);
+  sectionAttachmentsByAssessment[id] = current;
+  saveData(snapshot());
+  res.json({ success:true, removed: existed ? attId : null, ids: current[subId] });
+});
+try { const sqlite = require('./db-sqlite'); if (sqlite && typeof sqlite.saveAll === 'function') { sqlite.saveAll(currentSnapshot()); } } catch (e) { console.warn('SQLite initial save skipped', e.message); }
+
+// Start server
+app.listen(3001, '0.0.0.0', () => {
+  console.log('🚀 FRESH Backend running on http://0.0.0.0:3001');
+  console.log('🔍 Health: http://95.217.190.154:3001/health');
+  console.log('🔐 Login: admin@acme.example.com / demo123!');
+});
+
+app.put('/assessments/:id', (req,res)=>{
+  const { id } = req.params;
+  const idx = assessments.findIndex(a => a.id === id);
+  if (idx === -1) return res.status(404).json({ success:false, message:'Assessment not found' });
+  const { title, col, dueIn, framework } = req.body || {};
+  if (title !== undefined) assessments[idx].title = title;
+  if (col !== undefined) assessments[idx].col = col;
+  if (dueIn !== undefined) assessments[idx].dueIn = dueIn;
+  if (framework !== undefined) assessments[idx].framework = framework;
+  res.json({ success:true, assessment: assessments[idx] }); saveData(snapshot());
+});
+
+app.delete('/assessments/:id', (req,res)=>{
+  const { id } = req.params;
+  const idx = assessments.findIndex(a => a.id === id);
+  if (idx === -1) return res.status(404).json({ success:false, message:'Assessment not found' });
+  assessments[idx].archived = true;
+  res.json({ success:true, assessment: assessments[idx] }); saveData(snapshot());
+});
+
+app.put('/assessments/:id/unarchive', (req,res)=>{
+  const { id } = req.params;
+  const idx = assessments.findIndex(a => a.id === id);
+  if (idx === -1) return res.status(404).json({ success:false, message:'Assessment not found' });
+  assessments[idx].archived = false;
+  res.json({ success:true, assessment: assessments[idx] }); saveData(snapshot());
+});
+
+app.delete('/assessments/:id/messages/:msgId', (req,res)=>{
+  const { id, msgId } = req.params;
+  const list = messagesByAssessment[id] || [];
+  const idx = list.findIndex(m => m.id === msgId);
+  if (idx === -1) return res.status(404).json({ success:false, message:'Message not found' });
+  const removed = list.splice(idx,1)[0];
+  messagesByAssessment[id] = list;
+  saveData(snapshot());
+  res.json({ success:true, removed });
+});
+
+// --- Answers API (per-assessment, per-subsection form values) ---
+// GET answers for an assessment
+app.get('/assessments/:id/answers', (req, res) => {
+  const { id } = req.params;
+  const answers = answersByAssessment[id] || {};
+  res.json({ success: true, answers });
+});
+
+// PUT answers patch: { [subsectionId]: { fieldId: value } }
+app.put('/assessments/:id/answers', (req, res) => {
+  const { id } = req.params;
+  const patch = req.body || {};
+  if (typeof patch !== 'object' || Array.isArray(patch)) {
+    return res.status(400).json({ success: false, message: 'Invalid payload' });
+  }
+  const current = (answersByAssessment[id] = answersByAssessment[id] || {});
+  for (const key of Object.keys(patch)) {
+    const value = patch[key];
+    if (value && typeof value === 'object' && !Array.isArray(value)) {
+      current[key] = { ...(current[key] || {}), ...value };
+    } else {
+      // if value is not an object, store raw value under a default field
+      current[key] = value;
+    }
+  }
+  answersByAssessment[id] = current;
+  saveData(snapshot());
+  res.json({ success: true, answers: current });
+});

@@ -1,0 +1,9 @@
+{
+  "Contact": {
+    "Client-Name": "answers.1\\.1.companyName",
+    "Date-of-Report": "answers.1\\.2.dateOfReport",
+    "Assessment-Start": "answers.1\\.2.dateAssessmentBegan",
+    "Assessment-End": "answers.1\\.2.dateAssessmentEnded",
+    "Onsite-Dates": "answers.1\\.2.onsiteDates"
+  }
+}

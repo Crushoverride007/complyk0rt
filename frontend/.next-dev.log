@@ -1,0 +1,234 @@
+
+> complykort-frontend@1.0.0 dev
+> next dev -p 3000
+
+   ▲ Next.js 15.5.3
+   - Local:        http://localhost:3000
+   - Network:      http://95.217.190.154:3000
+   - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Ready in 3.5s
+ ○ Compiling / ...
+ ✓ Compiled / in 15.6s (651 modules)
+ HEAD / 200 in 16694ms
+ GET / 200 in 3827ms
+ ○ Compiling /users ...
+ ⚠ Cross origin request detected from 95.217.190.154 to /_next/* resource. In a future major version of Next.js, you will need to explicitly configure "allowedDevOrigins" in next.config to allow this.
+Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+ ✓ Compiled /files in 8s (668 modules)
+ GET /favicon.ico 200 in 5422ms
+ HEAD /users 200 in 7732ms
+ GET /files 200 in 2645ms
+ GET /favicon.ico 200 in 25ms
+ HEAD / 200 in 162ms
+ GET /favicon.ico 200 in 45ms
+ GET /files 200 in 114ms
+ GET /users 200 in 41ms
+ GET /files 200 in 70ms
+ ○ Compiling /frameworks ...
+ ✓ Compiled /frameworks in 782ms (673 modules)
+ GET /frameworks 200 in 1445ms
+ ○ Compiling /assessments ...
+ ✓ Compiled /assessments in 2.7s (686 modules)
+ GET /assessments 200 in 2901ms
+ ○ Compiling /assessments/[id] ...
+ ✓ Compiled /assessments/[id] in 1420ms (711 modules)
+ GET /assessments/A-001 200 in 2836ms
+ GET /assessments/A-001?tab=collaborators 200 in 94ms
+ GET /assessments/A-001?tab=attachments 200 in 130ms
+ GET /assessments/A-001?tab=messages 200 in 56ms
+ GET /files 200 in 137ms
+ GET /assessments 200 in 89ms
+ GET / 200 in 109ms
+ GET /files 200 in 93ms
+ GET /assessments 200 in 80ms
+ GET /assessments/1758742553451 200 in 193ms
+ GET / 200 in 85ms
+ GET / 200 in 521ms
+ GET / 200 in 237ms
+ GET /favicon.ico 200 in 310ms
+ ○ Compiling /_not-found ...
+ ✓ Compiled /_not-found in 3.1s (712 modules)
+ GET /security.txt 404 in 3774ms
+ GET / 200 in 366ms
+ GET /favicon.ico 200 in 95ms
+ GET /favicon.ico 200 in 34ms
+ GET /favicon.ico 200 in 24ms
+ GET /assessments 200 in 117ms
+ GET / 200 in 82ms
+ GET /assessments 200 in 197ms
+ GET /assessments/A-001 200 in 213ms
+ GET /assessments/A-001 200 in 81ms
+ ✓ Compiled in 2.9s (272 modules)
+ GET /assessments/A-001 200 in 148ms
+ ⨯ ./src/app/globals.css:175:1
+Syntax error: /root/complykort/frontend/src/app/globals.css `@layer components` is used but no matching `@tailwind components` directive is present.
+
+  173 | 
+  174 | 
+> 175 | @layer components {
+      | ^
+  176 |   .btn { @apply inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none h-9 px-3; }
+  177 |   .btn-sm { @apply h-8 px-2.5 text-sm; }
+ ○ Compiling /_error ...
+ ⨯ ./src/app/globals.css:175:1
+Syntax error: /root/complykort/frontend/src/app/globals.css `@layer components` is used but no matching `@tailwind components` directive is present.
+
+  173 | 
+  174 | 
+> 175 | @layer components {
+      | ^
+  176 |   .btn { @apply inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none h-9 px-3; }
+  177 |   .btn-sm { @apply h-8 px-2.5 text-sm; }
+ GET /assessments/A-001 500 in 16209ms
+ GET /assessments/A-001 500 in 62ms
+ GET /assessments/A-001 500 in 39ms
+ GET /assessments/A-001 500 in 38ms
+<w> [webpack.cache.PackFileCacheStrategy] Skipped not serializable cache item 'Compilation/modules|/root/complykort/frontend/node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[14].oneOf[10].use[2]!/root/complykort/frontend/node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[14].oneOf[10].use[3]!/root/complykort/frontend/src/app/globals.css': No serializer registered for PostCSSSyntaxError
+<w> while serializing webpack/lib/cache/PackFileCacheStrategy.PackContentItems -> webpack/lib/NormalModule -> webpack/lib/ModuleBuildError -> PostCSSSyntaxError
+ GET /assessments/A-001 500 in 69ms
+ ✓ Compiled /favicon.ico in 1764ms (637 modules)
+ GET /favicon.ico 500 in 1846ms
+ GET /assessments/A-001 500 in 72ms
+ GET /favicon.ico 500 in 29ms
+ GET /assessments/A-001 500 in 72ms
+ GET /favicon.ico 500 in 25ms
+ ⨯ ./src/app/globals.css:175:1
+Syntax error: /root/complykort/frontend/src/app/globals.css `@layer components` is used but no matching `@tailwind components` directive is present.
+
+  173 | 
+  174 | 
+> 175 | @layer components {
+      | ^
+  176 |   .btn { @apply inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none h-9 px-3; }
+  177 |   .btn-sm { @apply h-8 px-2.5 text-sm; }
+ ⨯ ./src/app/globals.css:175:1
+Syntax error: /root/complykort/frontend/src/app/globals.css `@layer components` is used but no matching `@tailwind components` directive is present.
+
+  173 | 
+  174 | 
+> 175 | @layer components {
+      | ^
+  176 |   .btn { @apply inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none h-9 px-3; }
+  177 |   .btn-sm { @apply h-8 px-2.5 text-sm; }
+ ✓ Compiled in 3.2s (1044 modules)
+ ✓ Compiled in 653ms (424 modules)
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ GET /assessments/A-001 200 in 1043ms
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ GET /assessments/A-001 200 in 162ms
+ GET /assessments/A-001 200 in 289ms
+ ○ Compiling /favicon.ico ...
+ ✓ Compiled /favicon.ico in 872ms (637 modules)
+ GET /favicon.ico 200 in 1264ms
+ ✓ Compiled in 4.5s (1044 modules)
+ GET /assessments/A-001 200 in 602ms
+ ✓ Compiled in 3.8s (1044 modules)
+ GET /assessments/A-001 200 in 363ms
+ GET /assessments/A-001?tab=attachments 200 in 137ms
+ GET /assessments/A-001?tab=messages 200 in 125ms
+ GET /assessments/A-001?tab=collaborators 200 in 163ms
+ GET / 200 in 106ms
+ GET /assessments 200 in 263ms
+ GET /users 200 in 102ms
+ GET /assessments 200 in 72ms
+ GET / 200 in 77ms
+ ○ Compiling /frameworks ...
+ ✓ Compiled /frameworks in 2.8s (624 modules)
+ GET /frameworks 200 in 3072ms
+ GET /frameworks 200 in 76ms
+ GET /assessments 200 in 93ms
+ GET /users 200 in 119ms
+ GET /files 200 in 90ms
+ GET /assessments 200 in 56ms
+ GET /users 200 in 84ms
+ GET /frameworks 200 in 111ms
+ GET /assessments 200 in 1138ms
+ GET / 200 in 122ms
+ GET /users 200 in 75ms
+ ✓ Compiled in 5.2s (1044 modules)
+ GET /users 200 in 223ms
+ GET /users 200 in 430ms
+ ○ Compiling /favicon.ico ...
+ ✓ Compiled /favicon.ico in 3.8s (637 modules)
+ GET /favicon.ico 200 in 4175ms
+ GET /favicon.ico 200 in 23ms
+ GET /favicon.ico 200 in 20ms
+ GET /assessments 200 in 226ms
+ GET / 200 in 73ms
+ ○ Compiling /frameworks ...
+ ✓ Compiled /frameworks in 1688ms (624 modules)
+ ✓ Compiled in 1ms (624 modules)
+ ✓ Compiled in 1ms (624 modules)
+ ✓ Compiled in 1ms (624 modules)
+ GET /files 200 in 1897ms
+ GET /frameworks 200 in 3549ms
+ GET /assessments 200 in 2415ms
+ GET /users 200 in 80ms
+ GET /frameworks 200 in 97ms
+ GET /files 200 in 132ms
+ ✓ Compiled in 4.1s (1048 modules)
+ GET /assessments 200 in 2556ms
+ GET /assessments 200 in 95ms
+ GET /assessments/A-001 200 in 145ms
+ GET /assessments/A-001?tab=collaborators 200 in 131ms
+ GET /assessments/A-001?tab=collaborators 200 in 823ms
+ ○ Compiling /favicon.ico ...
+ ✓ Compiled /favicon.ico in 3.3s (637 modules)
+ GET /favicon.ico 200 in 3686ms
+ GET /favicon.ico 200 in 28ms
+ GET /favicon.ico 200 in 24ms
+ ○ Compiling /frameworks ...
+ ✓ Compiled /frameworks in 574ms (641 modules)
+ GET /frameworks 200 in 925ms
+ GET /files 200 in 84ms
+ GET /assessments 200 in 90ms
+ GET /assessments/A-001 200 in 134ms
+ GET /assessments 200 in 53ms
+ ✓ Compiled in 5.9s (1044 modules)
+ GET /assessments 200 in 366ms
+ GET /users 200 in 89ms
+ GET /assessments 200 in 69ms
+ GET /assessments/A-001 200 in 190ms
+ GET / 200 in 584ms
+ GET /assessments 200 in 74ms
+ ○ Compiling /frameworks ...
+ ✓ Compiled /frameworks in 1666ms (624 modules)
+ GET /frameworks 200 in 2047ms
+ GET /files 200 in 80ms
+ GET /users 200 in 104ms
+ GET /files 200 in 62ms
+ GET /assessments 200 in 79ms
+ GET / 200 in 133ms
+ GET /users 200 in 109ms
+ GET /assessments 200 in 79ms
+ GET /frameworks 200 in 82ms
+ GET /files 200 in 72ms
+ GET /frameworks 200 in 105ms
+ GET /users 200 in 81ms
+ GET /assessments 200 in 76ms
+ GET /assessments/A-001 200 in 182ms
+ GET /assessments/A-001?tab=tasks 200 in 137ms
+ GET /assessments/A-001?tab=attachments 200 in 86ms
+ GET /assessments/A-001?tab=section 200 in 115ms
+ GET /assessments/A-001?tab=tasks 200 in 167ms
+ GET /assessments/A-001?tab=section 200 in 117ms
+ GET /assessments/A-001?tab=attachments 200 in 133ms
+ GET /assessments 200 in 72ms
+ GET /assessments/A-001 200 in 163ms
+ GET /assessments/A-001 200 in 169ms
+ GET / 200 in 77ms
+ GET /frameworks 200 in 91ms
+ GET /files 200 in 92ms
+ GET /assessments 200 in 109ms
+ GET / 200 in 81ms
+ GET / 200 in 496ms
+ GET / 200 in 146ms
+ ○ Compiling /favicon.ico ...
+ ✓ Compiled /favicon.ico in 1589ms (637 modules)
+ GET /favicon.ico 200 in 1921ms
+ GET /assessments 200 in 434ms
+ ○ Compiling /_not-found ...
+ ✓ Compiled /_not-found in 4.7s (1035 modules)
+[?25h

@@ -1,0 +1,18 @@
+{"level":"info","message":"ComplykOrt API server running on 0.0.0.0:3001","service":"complykort-api","timestamp":"2025-09-22T17:33:57.258Z"}
+{"level":"info","message":"Environment: development","service":"complykort-api","timestamp":"2025-09-22T17:33:57.263Z"}
+{"level":"info","message":"External access: http://95.217.190.154:3001","service":"complykort-api","timestamp":"2025-09-22T17:33:57.264Z"}
+{"level":"info","message":"Mode: Demo (No Database)","service":"complykort-api","timestamp":"2025-09-22T17:33:57.265Z"}
+{"level":"info","message":"ComplykOrt API server running on 0.0.0.0:3001","service":"complykort-api","timestamp":"2025-09-22T17:55:48.726Z"}
+{"level":"info","message":"Environment: development","service":"complykort-api","timestamp":"2025-09-22T17:55:48.731Z"}
+{"level":"info","message":"External access: http://95.217.190.154:3001","service":"complykort-api","timestamp":"2025-09-22T17:55:48.732Z"}
+{"level":"info","message":"Mode: Demo (No Database)","service":"complykort-api","timestamp":"2025-09-22T17:55:48.732Z"}
+{"level":"info","message":"SIGINT received, shutting down gracefully","service":"complykort-api","timestamp":"2025-09-22T17:56:18.003Z"}
+{"level":"info","message":"ComplykOrt API server running on 0.0.0.0:3001","service":"complykort-api","timestamp":"2025-09-22T17:56:52.354Z"}
+{"level":"info","message":"Environment: development","service":"complykort-api","timestamp":"2025-09-22T17:56:52.360Z"}
+{"level":"info","message":"External access: http://95.217.190.154:3001","service":"complykort-api","timestamp":"2025-09-22T17:56:52.360Z"}
+{"level":"info","message":"Mode: Demo (No Database)","service":"complykort-api","timestamp":"2025-09-22T17:56:52.360Z"}
+{"level":"info","message":"SIGTERM received, shutting down gracefully","service":"complykort-api","timestamp":"2025-09-22T18:03:53.453Z"}
+{"level":"info","message":"ComplykOrt API server running on 0.0.0.0:3001","service":"complykort-api","timestamp":"2025-09-22T18:03:57.145Z"}
+{"level":"info","message":"Environment: development","service":"complykort-api","timestamp":"2025-09-22T18:03:57.148Z"}
+{"level":"info","message":"External access: http://95.217.190.154:3001","service":"complykort-api","timestamp":"2025-09-22T18:03:57.149Z"}
+{"level":"info","message":"Mode: Demo (No Database)","service":"complykort-api","timestamp":"2025-09-22T18:03:57.149Z"}

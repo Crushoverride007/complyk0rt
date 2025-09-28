@@ -1,0 +1,330 @@
+"use client";
+
+function getAuthHeaders(init?: Record<string,string>) {
+  if (typeof window === 'undefined') return init || {};
+  try { const t = localStorage.getItem('auth_token'); return t ? { ...(init||{}), Authorization: `Bearer ${t}` } : (init||{}); } catch { return init||{} }
+}
+
+const BASE = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE || 'http://95.217.190.154:3001';
+
+export type BoardColumn = 'backlog'|'inprogress'|'review'|'finished';
+export interface AssessmentSummary { id:string; title:string; col:BoardColumn; dueIn:string; framework?: string; description?: string; assignedTo?: string; template?: string; created?: string; startDate?: string }
+export interface TaskItem { id:string; name:string; status:string; due:string }
+export interface MessageItem {
+  id: string;
+  user: string;
+  time: string;
+  text: string;
+  parentId?: string | null;
+  sections?: string[];
+  attachments?: string[];
+}
+export interface AttachmentItem { id:string; name:string; created:string; modified:string; size:string }
+
+export async function getAssessments(): Promise<AssessmentSummary[]> {
+  const r = await fetch(`${BASE}/assessments`, { headers: getAuthHeaders() });
+  const j = await r.json();
+  if (!r.ok || !j.success) throw new Error(j.message||'Failed assessments');
+  return j.assessments as AssessmentSummary[];
+}
+
+export async function getTasks(id:string): Promise<TaskItem[]> {
+  const r = await fetch(`${BASE}/assessments/${id}/tasks`, { headers: getAuthHeaders() });
+  const j = await r.json();
+  if (!r.ok || !j.success) throw new Error(j.message||'Failed tasks');
+  return j.tasks as TaskItem[];
+}
+
+export async function createTask(id:string, payload:{name:string; status?:string; due?:string}): Promise<TaskItem> {
+  const r = await fetch(`${BASE}/assessments/${id}/tasks`, { method:'POST', headers: getAuthHeaders({'Content-Type':'application/json'}), body: JSON.stringify(payload) });
+  const j = await r.json();
+  if (!r.ok || !j.success) throw new Error(j.message||'Failed create task');
+  return j.task as TaskItem;
+}
+
+export async function getMessages(id:string): Promise<MessageItem[]> {
+  const r = await fetch(`${BASE}/assessments/${id}/messages`, { headers: getAuthHeaders() });
+  const j = await r.json();
+  if (!r.ok || !j.success) throw new Error(j.message||'Failed messages');
+  return j.messages as MessageItem[];
+}
+
+export async function postMessage(id:string, payload:{user:string; text:string; parentId?: string|null; sections?: string[]; attachments?: string[]; mentions?: string[]}): Promise<MessageItem> {
+  const r = await fetch(`${BASE}/assessments/${id}/messages`, { method:'POST', headers: getAuthHeaders({'Content-Type':'application/json'}), body: JSON.stringify(payload) });
+  let j: any = null;
+  try { j = await r.json(); } catch {}
+  if (!r.ok || !j?.success) {
+    const err: any = new Error((j && j.message) || `Failed post message (${r.status})`);
+    err.status = r.status;
+    throw err;
+  }
+  return j.message as MessageItem;
+}
+
+export async function getAttachments(id:string): Promise<AttachmentItem[]> {
+  const r = await fetch(`${BASE}/assessments/${id}/attachments`, { headers: getAuthHeaders() });
+  const j = await r.json();
+  if (!r.ok || !j.success) throw new Error(j.message||'Failed attachments');
+  return j.attachments as AttachmentItem[];
+}
+
+// Upload a binary file and create an attachment entry
+export async function uploadAttachment(id: string, file: File): Promise<AttachmentItem> {
+  const buf = await file.arrayBuffer();
+  const r = await fetch(`${BASE}/assessments/${id}/attachments/upload?filename=${encodeURIComponent(file.name)}`,
+    { method:'POST', headers: getAuthHeaders({ 'Content-Type':'application/octet-stream' }), body: buf });
+  const j = await r.json();
+  if (!r.ok || !j.success) throw new Error(j.message || 'Failed upload');
+  return j.attachment as AttachmentItem;
+}
+
+// Section attachments
+export async function getSectionAttachments(id: string, subId: string): Promise<{ ids: string[]; attachments: AttachmentItem[] }>{
+  const r = await fetch(`${BASE}/assessments/${id}/sections/${encodeURIComponent(subId)}/attachments`, { headers: getAuthHeaders() });
+  const j = await r.json();
+  if (!r.ok || !j.success) throw new Error(j.message || 'Failed section attachments');
+  return { ids: j.ids as string[], attachments: (j.attachments || []) as AttachmentItem[] };
+}
+
+export async function linkSectionAttachments(id: string, subId: string, add?: string[], remove?: string[]): Promise<{ ids: string[]; attachments: AttachmentItem[] }>{
+  const r = await fetch(`${BASE}/assessments/${id}/sections/${encodeURIComponent(subId)}/attachments`, {
+    method:'PUT', headers: getAuthHeaders({ 'Content-Type':'application/json' }), body: JSON.stringify({ add, remove })
+  });
+  const j = await r.json();
+  if (!r.ok || !j.success) throw new Error(j.message || 'Failed to link attachments');
+  return { ids: j.ids as string[], attachments: (j.attachments || []) as AttachmentItem[] };
+}
+
+export async function unlinkSectionAttachment(id: string, subId: string, attId: string): Promise<string | null> {
+  const r = await fetch(`${BASE}/assessments/${id}/sections/${encodeURIComponent(subId)}/attachments/${attId}`, { method:'DELETE', headers: getAuthHeaders() });
+  const j = await r.json();
+  if (!r.ok || !j.success) throw new Error(j.message || 'Failed to unlink attachment');
+  return j.removed as string | null;
+}
+
+export async function createAssessment(payload:{ title:string; col?:BoardColumn; dueIn?:string; framework?: string; description?: string; assignedTo?: string; template?: string; created?: string; startDate?: string }): Promise<AssessmentSummary> {
+  const { title, col, dueIn, framework, created, startDate } = payload || ({} as any);
+  const r = await fetch(`${BASE}/assessments`, { method:'POST', headers: getAuthHeaders({'Content-Type':'application/json'}), body: JSON.stringify({ title, col, dueIn, framework, created, startDate }) });
+  const j = await r.json();
+  if (!r.ok || !j.success) throw new Error(j.message||'Failed create assessment');
+  return j.assessment as AssessmentSummary;
+}
+
+export async function deleteAssessment(id:string): Promise<{ removedId: string }> {
+  const r = await fetch(`${BASE}/assessments/${id}?hard=true`, { method:'DELETE', headers: getAuthHeaders() });
+  const j = await r.json();
+  if (!r.ok || !j.success) throw new Error(j.message||'Failed delete assessment');
+  return { removedId: (j.removed?.id || id) as string };
+}
+
+export async function updateAssessment(id:string, payload: Partial<{ title:string; col:BoardColumn; dueIn:string; framework: string; description?: string; assignedTo?: string; template?: string; created?: string }>): Promise<AssessmentSummary> {
+  const { title, col, dueIn, framework } = (payload || ({} as any));
+  const r = await fetch(`${BASE}/assessments/${id}`, { method:'PUT', headers: getAuthHeaders({'Content-Type':'application/json'}), body: JSON.stringify({ title, col, dueIn, framework }) });
+  const j = await r.json();
+  if (!r.ok || !j.success) throw new Error(j.message||'Failed update assessment');
+  return j.assessment as AssessmentSummary;
+}
+
+
+export async function archiveAssessment(id:string): Promise<AssessmentSummary> {
+  const r = await fetch(`${BASE}/assessments/${id}`, { method:'DELETE', headers: getAuthHeaders() });
+  const j = await r.json();
+  if (!r.ok || !j.success) throw new Error(j.message||'Failed archive assessment');
+  return j.assessment as AssessmentSummary;
+}
+
+
+export async function getArchivedAssessments(): Promise<AssessmentSummary[]> {
+  const r = await fetch(`${BASE}/assessments?archived=true`, { headers: getAuthHeaders() });
+  const j = await r.json();
+  if (!r.ok || !j.success) throw new Error(j.message||'Failed archived assessments');
+  return j.assessments as AssessmentSummary[];
+}
+
+export async function unarchiveAssessment(id:string): Promise<AssessmentSummary> {
+  const r = await fetch(`${BASE}/assessments/${id}/unarchive`, { method:'PUT', headers: getAuthHeaders() });
+  const j = await r.json();
+  if (!r.ok || !j.success) throw new Error(j.message||'Failed unarchive assessment');
+  return j.assessment as AssessmentSummary;
+}
+
+// --- Framework Structure ---
+export type FieldType =
+  | 'text'
+  | 'textarea'
+  | 'select'
+  | 'checkbox'
+  | 'radio'
+  | 'radio-table'
+  | 'checkbox-table'
+  | 'form-table'
+  | 'table-list'
+  | 'date'
+  | 'number'
+  // UI-only helpers to structure forms (rendered but not editable values)
+  | 'heading'
+  | 'divider'
+  // Alerts and uploads (non-answering UI widgets)
+  | 'alert'        // displayed informational banner; not persisted to answers
+  | 'dropzone';
+
+export interface FieldDef {
+  id: string;
+  type: FieldType;
+  label: string;
+  help?: string;
+  variant?: 'info'|'warning'|'success'|'error'; // for alert
+  multiple?: boolean; // for dropzone
+  accept?: string;    // for dropzone
+  required?: boolean;
+  // Simple conditional visibility: show this field only when another field matches a value
+  when?: { fieldId?: string; field?: string; equals?: any; eq?: any };
+  options?: string[];
+  // For table-style fields
+  rows?: { id: string; label: string }[];
+  columns?: { id: string; label: string; group?: string; type?: 'text'|'date'|'number'|'radio'; width?: string; placeholder?: string; options?: string[]; when?: { columnId?: string; colId?: string; fieldId?: string; field?: string; equals?: any; eq?: any } }[];
+}
+
+export interface FrameworkItem {
+  id: string;
+  label: string;
+  number?: string | number | null;
+  fields?: FieldDef[];
+}
+
+export interface FrameworkSection {
+  id?: string;
+  number: string | number;
+  heading: string;
+  items: FrameworkItem[];
+}
+
+export interface FrameworkPart {
+  id?: string;
+  title: string;
+  sections: FrameworkSection[];
+}
+
+export interface FrameworkStructure {
+  parts: FrameworkPart[];
+}
+
+export async function getAssessmentStructure(id: string): Promise<FrameworkStructure> {
+  const r = await fetch(`${BASE}/assessments/${id}/structure`, { headers: getAuthHeaders() });
+  const j = await r.json();
+  if (!r.ok || !j.success) throw new Error(j.message || 'Failed structure');
+  const structure = (j.structure || { parts: [] }) as FrameworkStructure;
+  try {
+    const parts = (structure as any).parts || [];
+    const first = parts[0];
+    if (first && Array.isArray(first.sections)) {
+      const idx5 = first.sections.findIndex((s: any) => String(s.number) === '5');
+      if (idx5 !== -1) {
+        const cur = first.sections[idx5];
+        const labels = (cur.items || []).map((it: any) => it && it.label).join('|');
+        if (/\bQ1\b|\bQ2\b|\bQ3\b|\bQ4\b/.test(labels)) {
+          first.sections[idx5] = {
+            number: 5,
+            heading: 'Quarterly Scan Results',
+            items: [
+              { id: '5.1', number: '5.1', label: 'Quarterly External Scan Results', fields: [
+                { id:'extScans', type:'table-list', label:'Identify each quarterly ASV scan performed within the last 12 months', minRows:4, columns:[
+                  { id:'date', label:'Date of the Scan(s)', type:'date', width:'18%' },
+                  { id:'asvName', label:'Name of ASV that Performed the Scan', width:'28%' },
+                  { id:'failedInitial', label:'Failed initial scan? (Yes/No)', width:'14%' },
+                  { id:'rescanDates', label:'If Failed: Date(s) of re-scans showing vulnerabilities corrected', width:'40%' }
+                ] },
+                { id:'isInitialExternal', type:'radio', label:'Indicate whether this is the assessed entity’s initial PCI DSS assessment against the ASV scan requirements', options:['Yes','No'] },
+                { id:'initialExternalDoc', type:'text', label:'If yes, identify the document verified that includes policies/procedures requiring scanning at least once every three months going forward' },
+                { id:'externalComments', type:'textarea', label:'Assessor comments, if applicable' }
+              ] },
+              { id: '5.2', number: '5.2', label: 'Attestations of Scan Compliance', fields: [
+                { id:'attestationCompleted', type:'radio', label:'Indicate whether the ASV and the assessed entity completed the Attestations of Scan Compliance (ASV Program Guide)', options:['Yes','No'] },
+                { id:'attestationComments', type:'textarea', label:'Comments (optional)' }
+              ] },
+              { id: '5.3', number: '5.3', label: 'Quarterly Internal Scan Results', fields: [
+                { id:'intScans', type:'table-list', label:'Identify each quarterly internal vulnerability scan performed within the last 12 months', minRows:4, columns:[
+                  { id:'date', label:'Date of the Scan(s)', type:'date', width:'18%' },
+                  { id:'authenticated', label:'Was the scan performed via authenticated scanning? (Yes/No)', width:'22%' },
+                  { id:'highRiskFound', label:'Any high-risk or critical vulnerabilities per the entity’s rankings (Req. 6.3.1)? (Yes/No)', width:'22%' },
+                  { id:'rescanDates', label:'If high-risk/critical found: Date(s) of re-scans showing vulnerabilities corrected', width:'38%' }
+                ] },
+                { id:'isInitialInternal', type:'radio', label:'Indicate if this is the assessed entity’s initial PCI DSS assessment against the internal scan requirements', options:['Yes','No'] },
+                { id:'initialInternalDoc', type:'text', label:'If yes, identify the document verified that includes policies/procedures requiring scanning at least once every three months going forward' },
+                { id:'internalComments', type:'textarea', label:'Assessor comments, if applicable' }
+              ] }
+            ]
+          } as any;
+        }
+      }
+    }
+  } catch {}
+  return structure;
+}
+
+
+
+// --- Helpers for card metadata (counts, progress, assignees) ---
+export interface AssessmentMeta {
+  attachments: number;
+  messages: number;
+  progress: number; // 0..100
+  assignees: string[]; // names or initials
+}
+
+export async function getAssessmentMeta(id: string): Promise<AssessmentMeta> {
+  const [msgs, atts, structure, answers] = await Promise.all([
+    getMessages(id).catch(()=>[]),
+    getAttachments(id).catch(()=>[]),
+    getAssessmentStructure(id).catch(()=>({ parts: [] } as FrameworkStructure)),
+    getAssessmentAnswers(id).catch(()=>({})),
+  ]);
+
+  // Compute completion based on same logic as LeftTree dots (non-empty subsection answers)
+  const allSubIds: string[] = [];
+  for (const part of structure.parts || []) {
+    for (const sec of part.sections || []) {
+      sec.items?.forEach((it, idx) => {
+        const subId = it.id || `${sec.number}.${idx + 1}`;
+        allSubIds.push(String(subId));
+      });
+    }
+  }
+
+  const hasAnswer = (v: any): boolean => {
+    if (!v) return false;
+    if (typeof v !== 'object' || Array.isArray(v)) return !!v;
+    return Object.values(v).some((val: any) => {
+      if (val == null) return false;
+      if (typeof val === 'string') return val.trim().length > 0;
+      if (typeof val === 'boolean') return val;
+      if (typeof val === 'number') return !Number.isNaN(val);
+      if (Array.isArray(val)) return val.length > 0;
+      return true;
+    });
+  };
+
+  const completedSubs = allSubIds.filter(subId => hasAnswer((answers as any)[subId])).length;
+  const progress = allSubIds.length ? Math.round((completedSubs / allSubIds.length) * 100) : 0;
+
+  // Heuristic assignees: top unique message users (acts as activity/assignee proxy in demo backend)
+  const assignees: string[] = Array.from(new Set((msgs as any[]).map((m:any) => m.user))).slice(0, 3);
+  return { attachments: (atts as any[]).length, messages: (msgs as any[]).length, progress, assignees };
+}
+
+// --- Answers ---
+export type Answers = Record<string, Record<string, any>>; // { [subId]: { fieldId: value } }
+
+export async function getAssessmentAnswers(id: string): Promise<Answers> {
+  const r = await fetch(`${BASE}/assessments/${id}/answers`, { headers: getAuthHeaders() });
+  const j = await r.json();
+  if (!r.ok || !j.success) throw new Error(j.message || 'Failed answers');
+  return j.answers as Answers;
+}
+
+export async function saveAssessmentAnswers(id: string, patch: Answers): Promise<Answers> {
+  const r = await fetch(`${BASE}/assessments/${id}/answers`, { method:'PUT', headers: getAuthHeaders({'Content-Type':'application/json'}), body: JSON.stringify(patch) });
+  const j = await r.json();
+  if (!r.ok || !j.success) throw new Error(j.message || 'Failed to save answers');
+  return j.answers as Answers;
+}

@@ -1,0 +1,286 @@
+nohup: ignoring input
+
+> complykort-frontend@1.0.0 dev
+> next dev
+
+   ▲ Next.js 15.5.3
+   - Local:        http://localhost:3000
+   - Network:      http://95.217.190.154:3000
+   - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Ready in 3.5s
+ ○ Compiling /assessments ...
+ ✓ Compiled /assessments in 15.8s (647 modules)
+ GET /assessments 200 in 17302ms
+ ✓ Compiled in 2.2s (249 modules)
+ ○ Compiling / ...
+ ✓ Compiled / in 1982ms (642 modules)
+ GET / 200 in 2591ms
+ ⚠ Cross origin request detected from 95.217.190.154 to /_next/* resource. In a future major version of Next.js, you will need to explicitly configure "allowedDevOrigins" in next.config to allow this.
+Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+ ○ Compiling /favicon.ico ...
+ ✓ Compiled /favicon.ico in 683ms (417 modules)
+ GET /favicon.ico 200 in 1016ms
+ ○ Compiling /assessments ...
+ ✓ Compiled /assessments in 694ms (425 modules)
+ GET /assessments 200 in 1031ms
+ GET /assessments 200 in 68ms
+ ○ Compiling /assessments/[id] ...
+ ✓ Compiled /assessments/[id] in 2.3s (692 modules)
+ GET /assessments/A-001 200 in 4098ms
+ GET /assessments/A-001 200 in 142ms
+ GET /assessments/A-001?tab=collaborators 200 in 123ms
+ GET /assessments/A-001?tab=messages 200 in 62ms
+ GET /assessments/A-001?tab=messages 200 in 808ms
+ GET /favicon.ico 200 in 84ms
+ ✓ Compiled in 2.6s (689 modules)
+ GET /assessments/A-001?tab=messages 200 in 1083ms
+ GET /assessments/A-001?tab=messages 200 in 2257ms
+ ○ Compiling /favicon.ico ...
+ ✓ Compiled /favicon.ico in 920ms (439 modules)
+ GET /favicon.ico 200 in 1155ms
+ GET /assessments/A-001?tab=messages 200 in 730ms
+ GET /favicon.ico 200 in 60ms
+ GET / 200 in 191ms
+ GET /assessments 200 in 85ms
+ GET /assessments/A-001 200 in 106ms
+ GET /assessments/A-001?tab=collaborators 200 in 128ms
+ GET /assessments/A-001?tab=messages 200 in 87ms
+ GET /assessments/A-001?tab=attachments 200 in 94ms
+ ✓ Compiled in 2.6s (689 modules)
+ GET /assessments 200 in 1276ms
+ GET /assessments 200 in 77ms
+ GET /assessments 200 in 471ms
+ ✓ Compiled /favicon.ico in 389ms (439 modules)
+ GET /favicon.ico 200 in 686ms
+ GET /assessments/A-001 200 in 304ms
+ GET /assessments/A-001?tab=tasks 200 in 123ms
+ GET /assessments/A-001?tab=messages 200 in 94ms
+ GET /assessments/A-001?tab=messages 200 in 766ms
+ GET /favicon.ico 200 in 45ms
+ ○ Compiling /users ...
+ ✓ Compiled /users in 3.8s (699 modules)
+ GET /users 200 in 4132ms
+ GET /users 200 in 63ms
+ GET /assessments 200 in 78ms
+ GET /assessments/A-001 200 in 113ms
+ GET / 200 in 137ms
+ ✓ Compiled in 2.9s (682 modules)
+ ✓ Compiled in 2s (696 modules)
+ GET / 200 in 468ms
+ GET /assessments 200 in 64ms
+ ○ Compiling /frameworks ...
+ ✓ Compiled /frameworks in 2.5s (687 modules)
+ GET /users 200 in 1190ms
+ GET /frameworks 200 in 2917ms
+ ○ Compiling /files ...
+ ✓ Compiled /files in 936ms (694 modules)
+ GET /files 200 in 1081ms
+ GET /assessments 200 in 117ms
+ GET /assessments/A-001 200 in 121ms
+ GET /assessments/A-001?tab=messages 200 in 138ms
+ GET / 200 in 92ms
+ GET /users 200 in 77ms
+ ✓ Compiled in 4.1s (699 modules)
+ GET /users 200 in 302ms
+ GET /users 200 in 701ms
+ ○ Compiling /favicon.ico ...
+ ✓ Compiled /favicon.ico in 2.9s (444 modules)
+ GET /favicon.ico 200 in 3179ms
+ GET /assessments 200 in 245ms
+ GET /assessments/A-001 200 in 152ms
+ GET /assessments/A-001?tab=collaborators 200 in 113ms
+ GET /users 200 in 82ms
+ GET /users 200 in 575ms
+ GET /favicon.ico 200 in 31ms
+ ✓ Compiled in 4.5s (699 modules)
+ GET /users 200 in 451ms
+ GET /users 200 in 458ms
+ ○ Compiling /favicon.ico ...
+ ✓ Compiled /favicon.ico in 587ms (444 modules)
+ GET /favicon.ico 200 in 836ms
+ GET /users 200 in 871ms
+ GET /favicon.ico 200 in 46ms
+ ✓ Compiled in 5.4s (716 modules)
+ GET /users 200 in 302ms
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ GET /users 200 in 467ms
+ GET /favicon.ico 200 in 64ms
+ GET /users 200 in 242ms
+ GET /favicon.ico 200 in 53ms
+ ✓ Compiled in 3.2s (716 modules)
+ GET /users 200 in 292ms
+ GET /users 200 in 342ms
+ GET /favicon.ico 200 in 58ms
+ ⨯ Error: Could not find the module "/root/complykort/frontend/node_modules/next/dist/next-devtools/userspace/app/segment-explorer-node.js#SegmentViewNode" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+    at stringify (<anonymous>) {
+  digest: '3708507472'
+}
+ ⨯ Error: Could not find the module "/root/complykort/frontend/node_modules/next/dist/next-devtools/userspace/app/segment-explorer-node.js#SegmentViewNode" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+    at stringify (<anonymous>)
+    at stringify (<anonymous>) {
+  digest: '1027669616'
+}
+ ⨯ Error: Could not find the module "/root/complykort/frontend/node_modules/next/dist/next-devtools/userspace/app/segment-explorer-node.js#SegmentViewNode" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+    at stringify (<anonymous>)
+    at stringify (<anonymous>) {
+  digest: '1027669616'
+}
+ ⨯ Error: Could not find the module "/root/complykort/frontend/node_modules/next/dist/next-devtools/userspace/app/segment-explorer-node.js#SegmentViewNode" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+    at stringify (<anonymous>)
+    at stringify (<anonymous>) {
+  digest: '1027669616'
+}
+ ⨯ Error: Could not find the module "/root/complykort/frontend/node_modules/next/dist/next-devtools/userspace/app/segment-explorer-node.js#SegmentViewNode" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+    at stringify (<anonymous>) {
+  digest: '3708507472'
+}
+ ⨯ Error: Could not find the module "/root/complykort/frontend/node_modules/next/dist/next-devtools/userspace/app/segment-explorer-node.js#SegmentViewNode" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+    at stringify (<anonymous>) {
+  digest: '3708507472'
+}
+ ⨯ [TypeError: __webpack_modules__[moduleId] is not a function] {
+  digest: '3971437740'
+}
+ ⨯ Error: Could not find the module "/root/complykort/frontend/node_modules/next/dist/next-devtools/userspace/app/segment-explorer-node.js#SegmentViewNode" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+    at stringify (<anonymous>) {
+  digest: '3708507472'
+}
+[TypeError: __webpack_modules__[moduleId] is not a function]
+ ⨯ [TypeError: __webpack_modules__[moduleId] is not a function]
+ ⨯ [TypeError: __webpack_modules__[moduleId] is not a function] {
+  page: '/users'
+}
+ ○ Compiling /_error ...
+ ✓ Compiled /_error in 9.1s (1025 modules)
+ ⨯ Error: Cannot find module './586.js'
+Require stack:
+- /root/complykort/frontend/.next/server/webpack-runtime.js
+- /root/complykort/frontend/.next/server/pages/_document.js
+- /root/complykort/frontend/node_modules/next/dist/server/require.js
+- /root/complykort/frontend/node_modules/next/dist/server/load-components.js
+- /root/complykort/frontend/node_modules/next/dist/build/utils.js
+- /root/complykort/frontend/node_modules/next/dist/build/swc/options.js
+- /root/complykort/frontend/node_modules/next/dist/build/swc/index.js
+- /root/complykort/frontend/node_modules/next/dist/build/analysis/parse-module.js
+- /root/complykort/frontend/node_modules/next/dist/build/analysis/get-page-static-info.js
+- /root/complykort/frontend/node_modules/next/dist/server/lib/router-utils/setup-dev-bundler.js
+- /root/complykort/frontend/node_modules/next/dist/server/lib/router-server.js
+- /root/complykort/frontend/node_modules/next/dist/server/lib/start-server.js
+    at <unknown> (.next/server/app/users/page.js:2:8477)
+    at Object.<anonymous> (.next/server/app/users/page.js:2:8534) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [Array],
+  page: '/users'
+}
+ GET /users 500 in 23717ms
+ GET /users 500 in 3467ms
+ ○ Compiling /favicon.ico ...
+ ✓ Compiled /favicon.ico in 2.3s (632 modules)
+ ⨯ Error: Cannot find module './586.js'
+Require stack:
+- /root/complykort/frontend/.next/server/webpack-runtime.js
+- /root/complykort/frontend/.next/server/app/favicon.ico/route.js
+- /root/complykort/frontend/node_modules/next/dist/server/require.js
+- /root/complykort/frontend/node_modules/next/dist/server/load-components.js
+- /root/complykort/frontend/node_modules/next/dist/build/utils.js
+- /root/complykort/frontend/node_modules/next/dist/build/swc/options.js
+- /root/complykort/frontend/node_modules/next/dist/build/swc/index.js
+- /root/complykort/frontend/node_modules/next/dist/build/analysis/parse-module.js
+- /root/complykort/frontend/node_modules/next/dist/build/analysis/get-page-static-info.js
+- /root/complykort/frontend/node_modules/next/dist/server/lib/router-utils/setup-dev-bundler.js
+- /root/complykort/frontend/node_modules/next/dist/server/lib/router-server.js
+- /root/complykort/frontend/node_modules/next/dist/server/lib/start-server.js
+    at <unknown> (.next/server/app/favicon.ico/route.js:1:72419)
+    at Object.<anonymous> (.next/server/app/favicon.ico/route.js:1:72464) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [Array],
+  page: '/favicon.ico'
+}
+ GET /favicon.ico 500 in 2383ms
+ ⨯ Error: Cannot find module './586.js'
+Require stack:
+- /root/complykort/frontend/.next/server/webpack-runtime.js
+- /root/complykort/frontend/.next/server/app/favicon.ico/route.js
+- /root/complykort/frontend/node_modules/next/dist/server/require.js
+- /root/complykort/frontend/node_modules/next/dist/server/load-components.js
+- /root/complykort/frontend/node_modules/next/dist/build/utils.js
+- /root/complykort/frontend/node_modules/next/dist/build/swc/options.js
+- /root/complykort/frontend/node_modules/next/dist/build/swc/index.js
+- /root/complykort/frontend/node_modules/next/dist/build/analysis/parse-module.js
+- /root/complykort/frontend/node_modules/next/dist/build/analysis/get-page-static-info.js
+- /root/complykort/frontend/node_modules/next/dist/server/lib/router-utils/setup-dev-bundler.js
+- /root/complykort/frontend/node_modules/next/dist/server/lib/router-server.js
+- /root/complykort/frontend/node_modules/next/dist/server/lib/start-server.js
+    at <unknown> (.next/server/app/users/page.js:2:8477)
+    at Object.<anonymous> (.next/server/app/users/page.js:2:8534) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [Array],
+  page: '/users'
+}
+ GET /users 500 in 802ms
+ ⨯ Error: Cannot find module './586.js'
+Require stack:
+- /root/complykort/frontend/.next/server/webpack-runtime.js
+- /root/complykort/frontend/.next/server/app/favicon.ico/route.js
+- /root/complykort/frontend/node_modules/next/dist/server/require.js
+- /root/complykort/frontend/node_modules/next/dist/server/load-components.js
+- /root/complykort/frontend/node_modules/next/dist/build/utils.js
+- /root/complykort/frontend/node_modules/next/dist/build/swc/options.js
+- /root/complykort/frontend/node_modules/next/dist/build/swc/index.js
+- /root/complykort/frontend/node_modules/next/dist/build/analysis/parse-module.js
+- /root/complykort/frontend/node_modules/next/dist/build/analysis/get-page-static-info.js
+- /root/complykort/frontend/node_modules/next/dist/server/lib/router-utils/setup-dev-bundler.js
+- /root/complykort/frontend/node_modules/next/dist/server/lib/router-server.js
+- /root/complykort/frontend/node_modules/next/dist/server/lib/start-server.js
+    at <unknown> (.next/server/app/favicon.ico/route.js:1:72419)
+    at Object.<anonymous> (.next/server/app/favicon.ico/route.js:1:72464) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [Array],
+  page: '/favicon.ico'
+}
+ GET /favicon.ico 500 in 151ms
+ ⨯ TypeError: __webpack_modules__[moduleId] is not a function
+    at (ssr)/./node_modules/next/dist/server/route-modules/app-page/module.compiled.js?d3c4 (.next/server/vendor-chunks/next.js:4464:1)
+    at (ssr)/./node_modules/next/dist/server/route-modules/app-page/vendored/ssr/react-jsx-runtime.js (.next/server/vendor-chunks/next.js:4530:1)
+    at (ssr)/./node_modules/next/dist/client/components/builtin/global-error.js (.next/server/vendor-chunks/next.js:3256:1) {
+  digest: '1183255707'
+}
+TypeError: __webpack_modules__[moduleId] is not a function
+    at (ssr)/./node_modules/next/dist/server/route-modules/app-page/module.compiled.js?d3c4 (.next/server/vendor-chunks/next.js:4464:1)
+    at (ssr)/./node_modules/next/dist/server/route-modules/app-page/vendored/ssr/react-jsx-runtime.js (.next/server/vendor-chunks/next.js:4530:1)
+    at (ssr)/./node_modules/next/dist/client/components/builtin/global-error.js (.next/server/vendor-chunks/next.js:3256:1)
+ ⨯ TypeError: __webpack_modules__[moduleId] is not a function
+    at (ssr)/./node_modules/next/dist/server/route-modules/app-page/module.compiled.js?d3c4 (.next/server/vendor-chunks/next.js:4464:1)
+    at (ssr)/./node_modules/next/dist/server/route-modules/app-page/vendored/ssr/react-jsx-runtime.js (.next/server/vendor-chunks/next.js:4530:1)
+    at (ssr)/./node_modules/next/dist/client/components/builtin/global-error.js (.next/server/vendor-chunks/next.js:3256:1)
+ ⨯ TypeError: __webpack_modules__[moduleId] is not a function
+    at (ssr)/./node_modules/next/dist/server/route-modules/app-page/module.compiled.js?d3c4 (.next/server/vendor-chunks/next.js:4464:1)
+    at (ssr)/./node_modules/next/dist/server/route-modules/app-page/vendored/ssr/react-jsx-runtime.js (.next/server/vendor-chunks/next.js:4530:1)
+    at (ssr)/./node_modules/next/dist/client/components/builtin/global-error.js (.next/server/vendor-chunks/next.js:3256:1) {
+  page: '/users'
+}
+ HEAD /users 500 in 4119ms
+ ⨯ TypeError: __webpack_modules__[moduleId] is not a function
+    at (ssr)/./node_modules/next/dist/server/route-modules/app-page/module.compiled.js?d3c4 (.next/server/vendor-chunks/next.js:4464:1)
+    at (ssr)/./node_modules/next/dist/server/route-modules/app-page/vendored/ssr/react-jsx-runtime.js (.next/server/vendor-chunks/next.js:4530:1)
+    at (ssr)/./node_modules/next/dist/client/components/builtin/global-error.js (.next/server/vendor-chunks/next.js:3256:1) {
+  digest: '1183255707'
+}
+TypeError: __webpack_modules__[moduleId] is not a function
+    at (ssr)/./node_modules/next/dist/server/route-modules/app-page/module.compiled.js?d3c4 (.next/server/vendor-chunks/next.js:4464:1)
+    at (ssr)/./node_modules/next/dist/server/route-modules/app-page/vendored/ssr/react-jsx-runtime.js (.next/server/vendor-chunks/next.js:4530:1)
+    at (ssr)/./node_modules/next/dist/client/components/builtin/global-error.js (.next/server/vendor-chunks/next.js:3256:1)
+ ⨯ TypeError: __webpack_modules__[moduleId] is not a function
+    at (ssr)/./node_modules/next/dist/server/route-modules/app-page/module.compiled.js?d3c4 (.next/server/vendor-chunks/next.js:4464:1)
+    at (ssr)/./node_modules/next/dist/server/route-modules/app-page/vendored/ssr/react-jsx-runtime.js (.next/server/vendor-chunks/next.js:4530:1)
+    at (ssr)/./node_modules/next/dist/client/components/builtin/global-error.js (.next/server/vendor-chunks/next.js:3256:1)
+ ⨯ TypeError: __webpack_modules__[moduleId] is not a function
+    at (ssr)/./node_modules/next/dist/server/route-modules/app-page/module.compiled.js?d3c4 (.next/server/vendor-chunks/next.js:4464:1)
+    at (ssr)/./node_modules/next/dist/server/route-modules/app-page/vendored/ssr/react-jsx-runtime.js (.next/server/vendor-chunks/next.js:4530:1)
+    at (ssr)/./node_modules/next/dist/client/components/builtin/global-error.js (.next/server/vendor-chunks/next.js:3256:1) {
+  page: '/users'
+}
+ GET /users 500 in 2255ms
+[?25h

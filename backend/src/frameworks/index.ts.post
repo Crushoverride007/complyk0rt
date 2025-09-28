@@ -1,0 +1,284 @@
+// Framework structure templates for assessments
+// NOTE: Kept minimal typing so runtime JSON is easy to return
+
+export const frameworkStructures: Record<string, any> = {
+  'PCI DSS 4.0': {
+    code: 'pci-dss-4-0',
+    parts: [
+      {
+        title: 'Part I: Assessment Overview',
+        sections: [
+          {
+            number: 1,
+            heading: 'Contact Information and Summary of Results',
+            items: [
+                id: '3.1',
+                number: '3.1',
+                label: 'Assessor’s Validation of Defined Scope Accuracy',
+                fields: [
+                  {
+                    id: 'scopeValidation',
+                    type: 'form-table',
+                    label: 'Assessor’s Validation of Defined Scope Accuracy',
+                    help: 'Describe how the assessor validated the accuracy of the defined PCI DSS scope for the assessment.',
+                    rows: [
+                      { id: 'diffFrom12_5', type: 'textarea', label: "Describe how the assessor's evaluation of scope differs from the assessed entity's evaluation of scope as documented in Requirement 12.5. If no difference was identified, mark as 'Not Applicable.'" },
+                      { id: 'assessorAttestor', type: 'textarea', label: 'Provide the name of the assessor who attests that: They have performed an independent evaluation of the scope of the assessed entity’s PCI DSS environment; if the assessor\'s evaluation identified areas of scope not included in the assessed entity\'s documented scope, the assessed entity has updated their scoping documentation; the scope of the assessment is complete and accurate to the best of the assessor’s knowledge.' },
+                      { id: 'exclusions', type: 'textarea', label: "Describe any business functions, locations, payment channels, or other areas of scope that were excluded from the assessment including the following: What was excluded; Why it was excluded; If it was included in a separate assessment. If none, mark as 'Not Applicable.'" },
+                      { id: 'scopeReduction', type: 'textarea', label: 'Identify any factors that resulted in reducing or limiting scope (for example, segmentation of the environment, use of a P2PE solution, etc.). If none, mark as “Not Applicable.”' },
+                      { id: 'saqEligibility', type: 'textarea', label: 'Describe any use of SAQ eligibility criteria in determining applicability of PCI DSS requirements for this assessment, including the following: The type of SAQ applied; The eligibility criteria for the applicable SAQ; How the assessor verified that the assessed entity’s environment meets the eligibility criteria. If not used, mark as “Not Applicable.”' },
+                      { id: 'additionalInfo', type: 'textarea', label: 'Additional information, if applicable' }
+                    ]
+                  }
+                ]
+              },
+              {
+                id: '3.2',
+                number: '3.2',
+                label: 'Segmentation',
+                fields: [
+                  { id:'segmentationUsed', type:'radio', label:'Indicate whether the assessed entity has used segmentation to reduce the scope of the assessment', options:['Yes','No'] },
+                  {
+                    id:'segmentationDetails',
+                    type:'form-table',
+                    label:'Segmentation details',
+                    rows: [
+                      { id:'ifNoAttestor', type:'text', label:'If “No”, provide the name of the assessor who attests that the entire network has been included in the scope of the assessment.' },
+                      { id:'descImplementation', type:'textarea', label:'If “Yes”, describe how the segmentation is implemented, including the technologies and processes used.' },
+                      { id:'outOfScopeEnvs', type:'textarea', label:'If “Yes”, describe the environments that were confirmed to be out of scope as a result of the segmentation methods.' },
+                      { id:'yesAttestor', type:'text', label:'If “Yes”, provide the name of the assessor who attests that the segmentation was verified to be adequate to reduce the scope of the assessment and that the technologies/processes used to implement segmentation were included in this PCI DSS assessment.' }
+                    ]
+                  }
+                ]
+              },
+              {
+                id: '3.3',
+                number: '3.3',
+                label: 'PCI SSC Validated Products and Solutions',
+                fields: [
+                  { id:'usesValidatedProducts', type:'radio', label:'Indicate whether the assessed entity uses one or more PCI SSC validated products or solutions', options:['Yes','No'] },
+                  {
+                    id:'validatedProducts',
+                    type:'table-list',
+                    label:'If “Yes,” provide the following regarding items the organization uses from PCI SSC’s Lists of Validated Products and Solutions',
+                    minRows: 5,
+                    columns: [
+                      { id:'name', label:'Name of PCI SSC validated product or solution' },
+                      { id:'version', label:'Version of product or solution' },
+                      { id:'standard', label:'PCI SSC Standard to which product or solution was validated' },
+                      { id:'listingRef', label:'PCI SSC listing reference number' },
+                      { id:'expiryDate', label:'Expiry date of listing', type:'date' }
+                    ]
+                  },
+                  {
+                    id:'validatedAssessorAttestor',
+                    type:'form-table',
+                    label:'Attestations and comments',
+                    rows: [
+                      { id:'manualAttestor', type:'textarea', label:'Provide the name of the assessor who attests that they have read the instruction manual associated with each of the solution(s) listed above and confirmed that the merchant has implemented the solution per the instructions and detail in the instruction manual.' },
+                      { id:'additionalComments', type:'textarea', label:'Any additional comments or findings the assessor would like to include, if applicable.' }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            number: 4,
+            heading: 'Details about Reviewed Environment',
+            items: [
+              { id: '4.1', number: '4.1', label: 'System components', fields: [ { id:'components', type:'textarea', label:'System components' } ] },
+              { id: '4.2', number: '4.2', label: 'In-scope applications', fields: [ { id:'apps', type:'textarea', label:'In-scope applications' } ] },
+              { id: '4.3', number: '4.3', label: 'Payment channels', fields: [ { id:'paymentChannels', type:'textarea', label:'Payment channels' } ] },
+              { id: '4.4', number: '4.4', label: 'Third-party service providers', fields: [ { id:'tpsps', type:'textarea', label:'Third-party service providers' } ] }
+            ]
+          },
+          {
+            number: 5,
+            heading: 'Quarterly Scan Results',
+            items: [
+              { id: '5.1', number: '5.1', label: 'Quarterly External Scan Results', fields: [
+                { id:'extScans', type:'table-list', label:'Identify each quarterly ASV scan performed within the last 12 months', minRows:4, columns:[
+                  { id:'date', label:'Date of the Scan(s)', type:'date', width:'18%' },
+                  { id:'asvName', label:'Name of ASV that Performed the Scan', width:'28%' },
+                  { id:'failedInitial', label:'Failed initial scan? (Yes/No)', type:'radio', options:['Yes','No'], width:'14%' },
+                  { id:'rescanDates', label:'If Failed: Date(s) of re-scans showing vulnerabilities corrected', width:'40%' }
+                ] },
+                { id:'isInitialExternal', type:'radio', label:'Indicate whether this is the assessed entity’s initial PCI DSS assessment against the ASV scan requirements', options:['Yes','No'] },
+                { id:'initialExternalDoc', type:'text', label:'If yes, identify the document verified that includes policies/procedures requiring scanning at least once every three months going forward' },
+                { id:'externalComments', type:'textarea', label:'Assessor comments, if applicable' }
+              ] },
+              { id: '5.2', number: '5.2', label: 'Attestations of Scan Compliance', fields: [
+                { id:'attestationCompleted', type:'radio', label:'Indicate whether the ASV and the assessed entity completed the Attestations of Scan Compliance (ASV Program Guide)', options:['Yes','No'] },
+                { id:'attestationComments', type:'textarea', label:'Comments (optional)' }
+              ] },
+              { id: '5.3', number: '5.3', label: 'Quarterly Internal Scan Results', fields: [
+                { id:'intScans', type:'table-list', label:'Identify each quarterly internal vulnerability scan performed within the last 12 months', minRows:4, columns:[
+                  { id:'date', label:'Date of the Scan(s)', type:'date', width:'18%' },
+                  { id:'authenticated', label:'Was the scan performed via authenticated scanning? (Yes/No)', type:'radio', options:['Yes','No'], width:'22%' },
+                  { id:'highRiskFound', label:'Any high-risk or critical vulnerabilities per the entity’s rankings (Req. 6.3.1)? (Yes/No)', type:'radio', options:['Yes','No'], width:'22%' },
+                  { id:'rescanDates', label:'If high-risk/critical found: Date(s) of re-scans showing vulnerabilities corrected', width:'38%' }
+                ] },
+                { id:'isInitialInternal', type:'radio', label:'Indicate if this is the assessed entity’s initial PCI DSS assessment against the internal scan requirements', options:['Yes','No'] },
+                { id:'initialInternalDoc', type:'text', label:'If yes, identify the document verified that includes policies/procedures requiring scanning at least once every three months going forward' },
+                { id:'internalComments', type:'textarea', label:'Assessor comments, if applicable' }
+              ] }
+            ]
+          }
+        ]
+      },
+      {
+        title: 'Part II: Sampling and Evidence, Findings and Observations',
+        sections: [
+          {
+            number: 6,
+            heading: 'Sampling and Evidence',
+            items: [
+              {
+                id: '6.1',
+                number: '6.1',
+                label: 'Evidence Retention',
+                fields: [
+                  { id:'evReposDesc', type:'textarea', label:'Describe the repositories where the evidence collected during this assessment is stored including the names of the repositories and how the data is secured.' },
+                  { id:'evReposController', type:'textarea', label:'Identify the entity or entities who controls the evidence repositories.' },
+                  { id:'evRetentionAck', type:'radio', label:'Indicate whether the entity or entities in control of the evidence repositories understands that all evidence from this assessment must be maintained for a minimum of 3 years and must be made available to PCI SSC upon request.', options:['Yes','No'] },
+                  { id:'evAssessorName', type:'text', label:'Identify the assessor who attests that all evidence has been gathered and stored as per the QSA Company’s evidence retention policy.' },
+                  { id:'evAssessorNotes', type:'textarea', label:'Additional notes (optional)' }
+                ]
+              },
+              {
+                id: '6.2',
+                number: '6.2',
+                label: 'Sampling',
+                fields: [
+                  { id:'samplingUsed', type:'radio', label:'Indicate whether sampling is used.', options:['Yes','No'] },
+                  { id:'ifNoAssessor', type:'text', label:'If “No,” provide the name of the assessor who attests that every item in each population has been assessed.' },
+                  { id:'ifYesRationale', type:'textarea', label:'If “Yes,” describe the sampling rationale(s) used for selecting sample sizes (for people, process evidence, technologies, devices, locations/sites, etc.).' },
+                  { id:'ifYesRepresent', type:'textarea', label:'Describe how the samples are appropriate and representative of the overall populations.' },
+                  { id:'standardizedControls', type:'radio', label:'Indicate whether standardized processes and controls are in place that provide consistency between each item in the samples—for example, automated system build processes, configuration change detection, etc.', options:['Yes','No'] },
+                  { id:'controlsValidated', type:'textarea', label:'If “Yes,” describe how the processes and controls were validated by the assessor to be in place and effective.' }
+                ]
+              },
+              {
+                id: '6.3',
+                number: '6.3',
+                label: 'Sample Sets for Reporting',
+                fields: [
+                  {
+                    id:'sampleSets',
+                    type:'table-list',
+                    label:'Identify all sample sets used during testing. If sampling is used the assessor must identify the items in the population that were tested (for example, as “Sample Set-1”).',
+                    minRows: 3,
+                    columns: [
+                      { id:'refNum', label:'Tested Sample Set Reference Number', width:'16%' },
+                      { id:'sampleType', label:'Sample Type/ Description', width:'22%' },
+                      { id:'identifyItems', label:'Identify All Items in the Sample Set', width:'28%' },
+                      { id:'selectionMethod', label:'Selection Method', width:'18%' },
+                      { id:'totalSampled', label:'Total Sampled', type:'number', width:'8%' },
+                      { id:'totalPopulation', label:'Total Population', type:'number', width:'8%' }
+                    ]
+                  }
+                ]
+              },
+              {
+                id: '6.4',
+                number: '6.4',
+                label: 'Documentation Evidence',
+                fields: [
+                  {
+                    id:'docEvidence',
+                    type:'table-list',
+                    label:'Identify all evidence for any testing procedure requiring a review of documents such as policies, procedures, standards, records, inventories, vendor documentation, and diagrams.',
+                    minRows: 4,
+                    columns: [
+                      { id:'ref', label:'Reference Number', width:'16%' },
+                      { id:'docName', label:'Document Name (including version, if applicable)', width:'38%' },
+                      { id:'purpose', label:'Document Purpose', width:'30%' },
+                      { id:'revisionDate', label:'Document Revision Date (if applicable)', type:'date', width:'16%' }
+                    ]
+                  }
+                ]
+              },
+              {
+                id: '6.5',
+                number: '6.5',
+                label: 'Interview Evidence',
+                fields: [
+                  {
+                    id:'interviewEvidence',
+                    type:'table-list',
+                    label:'Identify all evidence for testing procedures requiring an interview, such as interview notes.',
+                    minRows: 3,
+                    columns: [
+                      { id:'ref', label:'Reference Number', width:'16%' },
+                      { id:'title', label:'Title of Workpaper with Interview Notes', width:'34%' },
+                      { id:'topics', label:'Topics Covered', width:'34%' },
+                      { id:'roles', label:'Role(s) of Interviewee(s)', width:'16%' }
+                    ]
+                  }
+                ]
+              },
+              {
+                id: '6.6',
+                number: '6.6',
+                label: 'Other Assessment Evidence',
+                fields: [
+                  {
+                    id:'otherEvidence',
+                    type:'table-list',
+                    label:'Identify evidence for testing procedures that require observation of processes or examination of system evidence, such as configurations, settings, audit logs, access control lists, etc.',
+                    minRows: 3,
+                    columns: [
+                      { id:'ref', label:'Reference Number', width:'16%' },
+                      { id:'title', label:'Title of Workpaper or Evidence', width:'30%' },
+                      { id:'topics', label:'Topics Covered or Evidence Collected', width:'38%' },
+                      { id:'sampleSetRef', label:'Sample Set Reference Number from Table 6.3 (if applicable)', width:'16%' }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            number: 7,
+            heading: 'Findings and Observations',
+            items: [
+              { id: '7.1', number: '7.1', label: 'Build and Maintain a Secure Network and Systems' },
+              { id: '7.2', number: '7.2', label: 'Protect Account Data' },
+              { id: '7.3', number: '7.3', label: 'Maintain a Vulnerability Management Program' },
+              { id: '7.4', number: '7.4', label: 'Implement Strong Access Control Measures' },
+              { id: '7.5', number: '7.5', label: 'Regularly Monitor and Test Networks' },
+              { id: '7.6', number: '7.6', label: 'Maintain an Information Security Policy' },
+              { id: 'APP-A', number: null, label: 'Appendix A: Additional PCI DSS Requirements' },
+              { id: 'APP-B', number: null, label: 'Appendix B: Compensating Controls' },
+              { id: 'APP-C', number: null, label: 'Appendix C: Compensating Controls Worksheet' },
+              { id: 'APP-D', number: null, label: 'Customized Approach' },
+              { id: 'APP-E', number: null, label: 'Customized Approach Template' }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  'PCI DSS 3.2.1': {
+    code: 'pci-dss-3-2-1',
+    parts: [
+      {
+        title: 'Part I: Assessment Overview',
+        sections: [
+          { number: 1, heading: 'Contact Information and Report', items: [
+            { id:'1.1', number:'1.1', label:'Contact Information' },
+            { id:'1.2', number:'1.2', label:'Date and timeframe of' },
+            { id:'1.3', number:'1.3', label:'PCI DSS version' },
+            { id:'1.4', number:'1.4', label:'Additional services provided' },
+            { id:'1.5', number:'1.5', label:'Summary of Findings' }
+          ]},
+          { number: 2, heading: 'Summary Overview', items: [
+            { id:'2.1', number:'2.1', label:"Description of the entity's" },
+            { id:'2.2', number:'2.2', label:'High-level network diagram' }
+          ]}
+        ]
+      }
+    ]
+  }
+};

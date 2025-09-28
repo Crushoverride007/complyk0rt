@@ -1,0 +1,21 @@
+node:events:495
+      throw er; // Unhandled 'error' event
+      ^
+
+Error: listen EADDRINUSE: address already in use 0.0.0.0:3001
+    at Servernode[1211839]: ../src/node.cc:701:void node::ResetStdio(): Assertion `!(err != 0) || (err == -1 && (*__errno_location ()) == 1)' failed.
+ 1: 0xb9bbf0 node::Abort() [node]
+ 2: 0xb9bc6e  [node]
+ 3: 0xb53b24  [node]
+ 4: 0xb53c10 node::SignalExit(int, siginfo_t*, void*) [node]
+ 5: 0x70b3b6645330  [/lib/x86_64-linux-gnu/libc.so.6]
+ 6: 0x70b3b672a072 epoll_wait [/lib/x86_64-linux-gnu/libc.so.6]
+ 7: 0x16879e3  [node]
+ 8: 0x1675a3e uv_run [node]
+ 9: 0xad9a4a node::SpinEventLoop(node::Environment*) [node]
+10: 0xbe1294 node::NodeMainInstance::Run() [node]
+11: 0xb547f8 node::LoadSnapshotDataAndRun(node::SnapshotData const**, node::InitializationResult const*) [node]
+12: 0xb5845f node::Start(int, char**) [node]
+13: 0x70b3b662a1ca  [/lib/x86_64-linux-gnu/libc.so.6]
+14: 0x70b3b662a28b __libc_start_main [/lib/x86_64-linux-gnu/libc.so.6]
+15: 0xad77fe _start [node]

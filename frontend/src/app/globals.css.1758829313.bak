@@ -1,0 +1,197 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Theme tokens using CSS variables (light + dark) */
+@layer base {
+  :root {
+    --background: 0 0% 98%;            /* #fafafa */
+    --foreground: 222.2 47.4% 11.2%;   /* #484b6a */
+
+    --card: 0 0% 100%;                 /* white cards on very light bg */
+    --card-foreground: 234.7 19.1% 34.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 234.7 19.1% 34.9%;
+
+    --primary: 243.4 75.4% 58.6%;      /* brand primary #234C6A */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 214.3 31.8% 91.4%;    /* #e4e5f1 */
+    --secondary-foreground: 234.7 19.1% 34.9%;
+
+    --muted: 214.3 31.8% 91.4%;        /* subtle surfaces */
+    --muted-foreground: 215.4 16.3% 46.9%; /* #9394a5 */
+
+    --accent: 214.3 31.8% 91.4%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 214.3 31.8% 91.4%;       /* #d2d3db */
+    --input: 214.3 31.8% 91.4%;
+    --ring: 243.4 75.4% 58.6%;
+
+    /* Additional semantic tokens */
+    --success: 142.1 70.6% 45.3%;
+    --success-foreground: 0 0% 100%;
+    --warning: 24.6 95% 53%;
+    --warning-foreground: 0 0% 100%;
+
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;   /* #1B3C53 */
+    --foreground: 210 40% 98%;    /* #D2C1B6 */
+
+    --card: 222.2 84% 4.9%;         /* #234C6A */
+    --card-foreground: 23.6 23.7% 76.9%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 23.6 23.7% 76.9%;
+
+    --primary: 243.4 75.4% 58.6%;      /* keep brand */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 217.2 32.6% 17.5%;    /* #456882 as mid surface */
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20% 65%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 243.4 75.4% 62%;
+
+    /* Additional semantic tokens (dark) */
+    --success: 142.1 70.6% 40%;
+    --success-foreground: 0 0% 100%;
+    --warning: 24.6 95% 60%;
+    --warning-foreground: 0 0% 100%;
+  }
+
+  * { @apply border-border; }
+  body { @apply bg-background text-foreground antialiased; font-family: 'Inter', sans-serif; }
+}
+
+
+/* Reusable component-level utilities */
+@layer components {
+  .badge { @apply text-[10px] px-2 py-0.5 rounded-full border; }
+  /* Brand-aligned tones using tokens */
+  .tone-finished {
+    background-color: hsl(var(--primary) / 0.15);
+    color: hsl(var(--primary-foreground));
+    border-color: hsl(var(--primary) / 0.30);
+  }
+  .tone-review {
+    background-color: hsl(var(--accent) / 0.15);
+    color: hsl(var(--foreground));
+    border-color: hsl(var(--accent) / 0.30);
+  }
+  .tone-inprogress {
+    background-color: hsl(var(--secondary) / 0.35);
+    color: hsl(var(--foreground));
+    border-color: hsl(var(--secondary) / 0.50);
+  }
+  .tone-backlog {
+    background-color: hsl(var(--muted));
+    color: hsl(var(--muted-foreground));
+    border-color: hsl(var(--border));
+  }
+  .tone-danger {
+    background-color: hsl(var(--destructive) / 0.15);
+    color: hsl(var(--destructive-foreground));
+    border-color: hsl(var(--destructive) / 0.30);
+  }
+
+  .tone-success {
+    background-color: hsl(var(--success) / 0.15);
+    color: hsl(var(--success-foreground));
+    border-color: hsl(var(--success) / 0.30);
+  }
+  .tone-warning {
+    background-color: hsl(var(--warning) / 0.15);
+    color: hsl(var(--warning-foreground));
+    border-color: hsl(var(--warning) / 0.30);
+  }
+  .dot {
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 9999px;
+    display: inline-block;
+    border-width: 1px;
+  }
+  .dot-success {
+    background-color: hsl(var(--success));
+    border-color: hsl(var(--success) / 0.6);
+  }
+  .dot-warning {
+    background-color: hsl(var(--warning));
+    border-color: hsl(var(--warning) / 0.6);
+  }
+  .dot-danger {
+    background-color: hsl(var(--destructive));
+    border-color: hsl(var(--destructive) / 0.6);
+  }
+}
+
+@tailwind utilities;
+
+
+@layer utilities {
+  /* Subtle grid overlay, adapts to tokens */
+  .bg-grid {
+    background-image:
+      linear-gradient(to right, hsl(var(--foreground) / 0.06) 1px, transparent 1px),
+      linear-gradient(to bottom, hsl(var(--foreground) / 0.06) 1px, transparent 1px);
+    background-size: 24px 24px;
+    background-position: center;
+  }
+  /* Next-like spotlight radial gradient at top center */
+  .bg-spotlight {
+    background: radial-gradient(600px circle at 50% -10%, hsl(var(--primary) / 0.18), transparent 60%);
+  }
+  /* Corner arc rings reminiscent of nextjs.org hero */
+  .bg-corner-rings {
+    background-image:
+      radial-gradient(650px circle at 0 0,           transparent 648px, hsl(var(--foreground) / 0.08) 649px, transparent 650px),
+      radial-gradient(500px circle at 100% 0,       transparent 498px, hsl(var(--foreground) / 0.08) 499px, transparent 500px),
+      radial-gradient(500px circle at 0 100%,       transparent 498px, hsl(var(--foreground) / 0.08) 499px, transparent 500px),
+      radial-gradient(700px circle at 100% 100%,    transparent 698px, hsl(var(--foreground) / 0.08) 699px, transparent 700px);
+    background-repeat: no-repeat;
+  }
+}
+
+@layer components {
+  .btn { @apply inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none h-9 px-3; }
+  .btn-sm { @apply h-8 px-2.5 text-sm; }
+  .btn-xs { @apply h-7 px-2 text-xs; }
+
+  .btn-primary { @apply btn bg-primary text-primary-foreground border border-transparent hover:brightness-110; }
+  .btn-secondary { @apply btn bg-secondary text-foreground border border-transparent hover:brightness-105; }
+  .btn-destructive { @apply btn bg-destructive text-destructive-foreground border border-transparent hover:brightness-110; }
+  .btn-outline { @apply btn border border-border text-foreground bg-transparent hover:bg-accent; }
+  .btn-ghost { @apply btn bg-transparent hover:bg-accent border border-transparent; }
+}
+
+@layer components {
+  .btn { @apply inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none h-9 px-3; }
+  .btn-sm { @apply h-8 px-2.5 text-sm; }
+  .btn-xs { @apply h-7 px-2 text-xs; }
+
+  .btn-primary { @apply btn bg-primary text-primary-foreground border border-transparent hover:brightness-110; }
+  .btn-secondary { @apply btn bg-secondary text-foreground border border-transparent hover:brightness-105; }
+  .btn-destructive { @apply btn bg-destructive text-destructive-foreground border border-transparent hover:brightness-110; }
+  .btn-outline { @apply btn border border-border text-foreground bg-transparent hover:bg-accent; }
+  .btn-ghost { @apply btn bg-transparent hover:bg-accent border border-transparent; }
+}

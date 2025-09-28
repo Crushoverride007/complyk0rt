@@ -1,0 +1,14 @@
+// Framework structure templates for assessments
+// NOTE: Kept minimal typing so runtime JSON is easy to return
+
+export const frameworkStructures: Record<string, any> = {
+  'PCI DSS 4.0': {
+    code: 'pci-dss-4-0',
+    parts: [
+      {
+        title: 'Part I: Assessment Overview',
+        sections: [
+          {
+            number: 1,
+            heading: 'Contact Information and Summary of Results',
+            items: [

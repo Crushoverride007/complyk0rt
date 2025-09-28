@@ -1,0 +1,223 @@
+
+> complykort-frontend@1.0.0 dev
+> next dev -H 0.0.0.0 -p 3000
+
+   ▲ Next.js 15.5.3
+   - Local:        http://localhost:3000
+   - Network:      http://0.0.0.0:3000
+   - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Ready in 4.4s
+ ○ Compiling / ...
+ ✓ Compiled / in 8.3s (651 modules)
+ ✓ Compiled in 2s (251 modules)
+ GET / 200 in 10438ms
+ ⚠ Blocked cross-origin request from 95.217.190.154 to /_next/* resource. To allow this, configure "allowedDevOrigins" in next.config
+Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+ ○ Compiling /assessments ...
+ ✓ Compiled /assessments in 1665ms (637 modules)
+ GET /assessments 200 in 2005ms
+ ○ Compiling /assessments/[id] ...
+ ✓ Compiled /assessments/[id] in 1624ms (662 modules)
+ GET /assessments/A-001 200 in 4244ms
+ GET /assessments 200 in 219ms
+ GET /assessments/A-001 200 in 100ms
+ ✓ Compiled in 1754ms (266 modules)
+ ○ Compiling /assessments/[id] ...
+ ✓ Compiled /assessments/[id] in 826ms (403 modules)
+ GET /assessments/A-001 200 in 1522ms
+ ✓ Compiled /assessments in 279ms (410 modules)
+ GET /assessments 200 in 529ms
+ GET /assessments/A-001 200 in 114ms
+ GET /assessments/A-001 200 in 726ms
+ GET /assessments/A-001 200 in 311ms
+ ○ Compiling /favicon.ico ...
+ ✓ Compiled /favicon.ico in 1951ms (420 modules)
+ GET /favicon.ico 200 in 2348ms
+ GET /assessments/A-001 200 in 826ms
+ GET /favicon.ico 200 in 48ms
+ ○ Compiling / ...
+ ✓ Compiled / in 1931ms (400 modules)
+ GET / 200 in 2748ms
+ ○ Compiling /assessments/[id] ...
+ ✓ Compiled /assessments/[id] in 862ms (403 modules)
+ GET /assessments/A-001 200 in 1654ms
+ ✓ Compiled /favicon.ico in 351ms (420 modules)
+ GET /favicon.ico 200 in 664ms
+ ✓ Compiled / in 242ms (431 modules)
+ GET / 200 in 742ms
+ GET /favicon.ico 200 in 51ms
+ ○ Compiling /assessments ...
+ ✓ Compiled /assessments in 729ms (438 modules)
+ GET /assessments 200 in 1122ms
+ GET /favicon.ico 200 in 39ms
+ GET /assessments/A-001 200 in 165ms
+ GET /favicon.ico 200 in 38ms
+ GET / 200 in 161ms
+ GET /assessments 200 in 84ms
+ GET / 200 in 78ms
+ GET / 200 in 76ms
+ GET /assessments 200 in 95ms
+ GET /assessments/A-001 200 in 120ms
+ ○ Compiling /files ...
+ ✓ Compiled /files in 2s (669 modules)
+ GET /files 200 in 2446ms
+ ○ Compiling /calendar ...
+ ✓ Compiled /calendar in 2.4s (680 modules)
+ GET /calendar 200 in 2645ms
+ ○ Compiling / ...
+ ✓ Compiled / in 536ms (433 modules)
+ GET / 200 in 781ms
+ GET /assessments 200 in 72ms
+ GET /assessments/A-001 200 in 118ms
+ ○ Compiling /_not-found ...
+ GET / 200 in 1684ms
+ ✓ Compiled /favicon.ico in 2.6s (680 modules)
+ GET /favicon.ico 200 in 1854ms
+ GET /favicon.ico 200 in 3803ms
+ GET /apple-touch-icon-precomposed.png 404 in 3974ms
+ GET /apple-touch-icon.png 404 in 3815ms
+ GET / 200 in 243ms
+ ○ Compiling /calendar ...
+ ✓ Compiled /calendar in 932ms (407 modules)
+ GET /calendar 200 in 1325ms
+ ○ Compiling /_not-found ...
+ ✓ Compiled /favicon.ico in 857ms (687 modules)
+ GET /favicon.ico 200 in 1669ms
+ GET /favicon.ico 200 in 1672ms
+ GET /apple-touch-icon.png 404 in 1328ms
+ GET /apple-touch-icon-precomposed.png 404 in 1816ms
+ HEAD / 200 in 271ms
+ HEAD / 200 in 170ms
+ HEAD / 200 in 138ms
+ HEAD / 200 in 177ms
+ HEAD / 200 in 163ms
+ HEAD / 200 in 121ms
+ GET / 200 in 209ms
+ GET / 200 in 153ms
+ GET /favicon.ico 200 in 95ms
+ HEAD / 200 in 140ms
+ GET / 200 in 201ms
+ HEAD / 200 in 115ms
+ HEAD / 200 in 97ms
+ GET / 200 in 197ms
+ GET / 200 in 171ms
+ HEAD / 200 in 113ms
+ GET / 200 in 143ms
+ ⚠ Blocked cross-origin request from kortlabs.xyz to /_next/* resource. To allow this, configure "allowedDevOrigins" in next.config
+Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+ GET / 200 in 144ms
+ GET / 200 in 120ms
+ GET / 200 in 143ms
+ GET /favicon.ico 200 in 39ms
+ HEAD / 200 in 151ms
+ HEAD / 200 in 134ms
+ GET /favicon.ico 200 in 308ms
+ GET /favicon.ico 200 in 307ms
+ GET /apple-touch-icon-precomposed.png 404 in 548ms
+ GET /apple-touch-icon.png 404 in 443ms
+ HEAD / 200 in 100ms
+ GET / 200 in 136ms
+ GET / 200 in 124ms
+ GET / 200 in 165ms
+ GET / 200 in 124ms
+ GET /apple-touch-icon-precomposed.png 404 in 145ms
+ GET /favicon.ico 200 in 118ms
+ GET / 200 in 235ms
+ GET /apple-touch-icon.png 404 in 115ms
+ GET /favicon.ico 200 in 20ms
+ GET /apple-touch-icon-precomposed.png 404 in 310ms
+ GET /favicon.ico 200 in 125ms
+ GET / 200 in 347ms
+ GET /apple-touch-icon.png 404 in 127ms
+ GET /favicon.ico 200 in 20ms
+ GET / 200 in 136ms
+ GET / 200 in 539ms
+ HEAD / 200 in 277ms
+ GET / 200 in 334ms
+ GET / 200 in 112ms
+ GET / 200 in 130ms
+ GET / 200 in 142ms
+ GET / 200 in 117ms
+ GET /@vite/env 404 in 114ms
+ GET /@vite/env 404 in 192ms
+ GET /actuator/env 404 in 242ms
+ POST /php-cgi/php-cgi.exe?%ADd+cgi.force_redirect%3D0+%ADd+disable_functions%3D""+%ADd+allow_url_include%3D1+%ADd+auto_prepend_file%3Dphp://input 404 in 138ms
+ GET /actuator/env 404 in 271ms
+ POST /php-cgi/php-cgi.exe?%ADd+cgi.force_redirect%3D0+%ADd+disable_functions%3D""+%ADd+allow_url_include%3D1+%ADd+auto_prepend_file%3Dphp://input 404 in 149ms
+ GET /server 404 in 350ms
+ GET /server 404 in 517ms
+ GET /.vscode/sftp.json 404 in 582ms
+ GET /.vscode/sftp.json 404 in 385ms
+ GET /about 404 in 216ms
+ GET /about 404 in 119ms
+ GET /debug/default/view?panel=config 404 in 258ms
+ GET /debug/default/view?panel=config 404 in 122ms
+ GET /v2/_catalog 404 in 242ms
+ GET /v2/_catalog 404 in 177ms
+ GET /ecp/Current/exporttool/microsoft.exchange.ediscovery.exporttool.application 404 in 406ms
+ GET / 200 in 460ms
+ GET /ecp/Current/exporttool/microsoft.exchange.ediscovery.exporttool.application 404 in 198ms
+ GET /server-status 404 in 195ms
+ GET /login.action 404 in 162ms
+ GET /server-status 404 in 248ms
+ GET /_all_dbs 404 in 125ms
+ GET /login.action 404 in 242ms
+ GET /.DS_Store 404 in 243ms
+ GET /_all_dbs 404 in 114ms
+ GET /.DS_Store 404 in 240ms
+ GET /.env 404 in 137ms
+ GET /.git/config 404 in 179ms
+ GET /.env 404 in 182ms
+ GET /.git/config 404 in 363ms
+ GET /s/435313e2039313e2731323e25393/_/;/META-INF/maven/com.atlassian.jira/jira-webapp-dist/pom.properties 404 in 334ms
+ GET /s/435313e2039313e2731323e25393/_/;/META-INF/maven/com.atlassian.jira/jira-webapp-dist/pom.properties 404 in 245ms
+ GET /config.json 404 in 283ms
+ GET /config.json 404 in 278ms
+ GET /telescope/requests 404 in 240ms
+ GET /telescope/requests 404 in 224ms
+ GET /info.php 404 in 232ms
+ GET /info.php 404 in 140ms
+ GET /?rest_route=/wp/v2/users/ 200 in 108ms
+ GET /?rest_route=/wp/v2/users/ 200 in 113ms
+ GET / 200 in 115ms
+ GET / 200 in 115ms
+ HEAD / 200 in 92ms
+ GET / 200 in 137ms
+ GET / 200 in 127ms
+ GET /api/dashboard/overview 404 in 116ms
+ GET / 200 in 161ms
+ ○ Compiling /assessments ...
+ ✓ Compiled /assessments in 2s (408 modules)
+ GET /assessments 200 in 2467ms
+ ○ Compiling /assessments/[id] ...
+ ✓ Compiled /assessments/[id] in 1642ms (422 modules)
+ GET /assessments/A-001 200 in 1928ms
+ GET / 200 in 560ms
+ GET / 200 in 156ms
+ GET / 200 in 138ms
+ ○ Compiling /favicon.ico ...
+ ✓ Compiled /favicon.ico in 1013ms (417 modules)
+ GET /favicon.ico 200 in 1295ms
+ ✓ Compiled /_not-found in 419ms (680 modules)
+ GET /favicon.ico 200 in 1352ms
+ GET /favicon.ico 200 in 1366ms
+ GET /apple-touch-icon-precomposed.png 404 in 1626ms
+ GET /apple-touch-icon.png 404 in 1432ms
+ GET /apple-touch-icon-precomposed.png 404 in 290ms
+ GET /favicon.ico 200 in 178ms
+ GET /favicon.ico 200 in 176ms
+ GET /apple-touch-icon.png 404 in 195ms
+ GET /favicon.ico 200 in 31ms
+ GET /favicon.ico 200 in 30ms
+ GET /apple-touch-icon.png 404 in 260ms
+ GET /apple-touch-icon-precomposed.png 404 in 265ms
+ GET / 200 in 89ms
+ HEAD / 200 in 185ms
+ GET / 200 in 132ms
+ GET / 200 in 238ms
+ GET / 200 in 140ms
+   Reload env: .env.local
+ ✓ Compiled in 2.6s (658 modules)
+[?25h

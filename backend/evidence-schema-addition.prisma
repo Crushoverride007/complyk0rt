@@ -1,0 +1,113 @@
+
+// Evidence Management Models for Section 6: Sampling and Evidence
+
+model Evidence {
+  id                String               @id @default(uuid()) @db.Uuid
+  orgId             String               @map("org_id") @db.Uuid
+  assessmentId      String?              @map("assessment_id") @db.Uuid
+  projectId         String?              @map("project_id") @db.Uuid
+  sectionKey        String               @map("section_key") @db.VarChar(50)
+  
+  // Evidence Types
+  type              EvidenceType         // DOCUMENT, INTERVIEW, SAMPLING, CONFIGURATION, OTHER
+  category          String               @db.VarChar(100) // Evidence Retention, Sampling, etc.
+  
+  // Core Fields
+  title             String               @db.VarChar(255)
+  description       String?              @db.Text
+  referenceNumber   String?              @map("reference_number") @db.VarChar(100)
+  
+  // Document-specific fields
+  documentName      String?              @map("document_name") @db.VarChar(255)
+  documentVersion   String?              @map("document_version") @db.VarChar(50)
+  documentPurpose   String?              @map("document_purpose") @db.Text
+  revisionDate      DateTime?            @map("revision_date") @db.Timestamptz(6)
+  
+  // Interview-specific fields
+  interviewee       String?              @db.VarChar(255)
+  intervieweeRole   String?              @map("interviewee_role") @db.VarChar(255)
+  topicsCovered     String?              @map("topics_covered") @db.Text
+  
+  // Sampling-specific fields
+  sampleType        String?              @map("sample_type") @db.VarChar(255)
+  selectionMethod   String?              @map("selection_method") @db.VarChar(255)
+  totalSampled      Int?                 @map("total_sampled")
+  totalPopulation   Int?                 @map("total_population")
+  sampleSetRef      String?              @map("sample_set_ref") @db.VarChar(100)
+  
+  // Configuration/System evidence
+  systemName        String?              @map("system_name") @db.VarChar(255)
+  configDetails     String?              @map("config_details") @db.Text
+  
+  // Metadata
+  status            EvidenceStatus       @default(DRAFT) // DRAFT, IN_REVIEW, APPROVED, REJECTED
+  collectedBy       String               @map("collected_by") @db.Uuid
+  reviewedBy        String?              @map("reviewed_by") @db.Uuid
+  approvedBy        String?              @map("approved_by") @db.Uuid
+  
+  // Retention info
+  retentionPolicy   String?              @map("retention_policy") @db.Text
+  retentionYears    Int?                 @map("retention_years")
+  repositoryName    String?              @map("repository_name") @db.VarChar(255)
+  securityControls  String?              @map("security_controls") @db.Text
+  
+  createdAt         DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime             @updatedAt @map("updated_at") @db.Timestamptz(6)
+  
+  // Relations
+  organization      Organization         @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  project           Project?             @relation(fields: [projectId], references: [id])
+  collector         User                 @relation("EvidenceCollector", fields: [collectedBy], references: [id])
+  reviewer          User?                @relation("EvidenceReviewer", fields: [reviewedBy], references: [id])
+  approver          User?                @relation("EvidenceApprover", fields: [approvedBy], references: [id])
+  files             File[]               @relation("EvidenceFiles")
+  sampleSets        SampleSet[]
+  
+  @@index([orgId, type, status])
+  @@index([orgId, sectionKey])
+  @@index([orgId, assessmentId])
+  @@index([referenceNumber])
+  @@map("evidence")
+}
+
+model SampleSet {
+  id                String               @id @default(uuid()) @db.Uuid
+  orgId             String               @map("org_id") @db.Uuid
+  evidenceId        String               @map("evidence_id") @db.Uuid
+  
+  referenceNumber   String               @map("reference_number") @db.VarChar(100)
+  sampleType        String               @map("sample_type") @db.VarChar(255)
+  description       String?              @db.Text
+  selectionMethod   String               @map("selection_method") @db.VarChar(255)
+  totalSampled      Int                  @map("total_sampled")
+  totalPopulation   Int                  @map("total_population")
+  
+  // Sample items details (JSON array)
+  sampleItems       Json                 @map("sample_items") @default("[]")
+  
+  createdAt         DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime             @updatedAt @map("updated_at") @db.Timestamptz(6)
+  
+  // Relations
+  organization      Organization         @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  evidence          Evidence             @relation(fields: [evidenceId], references: [id], onDelete: Cascade)
+  
+  @@index([orgId, referenceNumber])
+  @@index([evidenceId])
+  @@map("sample_sets")
+}
+
+enum EvidenceType {
+  DOCUMENT
+  INTERVIEW
+  SAMPLING
+  CONFIGURATION
+  OTHER
+}
+
+enum EvidenceStatus {
+  DRAFT
+  IN_REVIEW
+  APPROVED
+  REJECTED
+}
