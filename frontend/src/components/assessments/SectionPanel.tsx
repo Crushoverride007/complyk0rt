@@ -619,8 +619,7 @@ const fullWidth = (() => {
                       </div>
                       {f.help && (((f as any).helpPosition === 'below') || (f as any).helpBelow || f.id === 'componentTypes') && (
                         <div className="mt-2 text-xs text-muted-foreground">
-                          {String(f.help).split('
-').map((line, i) => (
+                          {String(f.help).split('\n').map((line, i) => (
                             <div key={i}>{line}</div>
                           ))}
                         </div>
