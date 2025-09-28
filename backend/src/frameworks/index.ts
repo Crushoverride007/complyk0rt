@@ -470,11 +470,13 @@ export const frameworkStructures: Record<string, any> = {
                 label: 'Sampling',
                 fields: [
                   { id:'samplingUsed', type:'radio', label:'Indicate whether sampling is used.', options:['Yes','No'] },
-                  { id:'ifNoAssessor', type:'text', label:'If “No,” provide the name of the assessor who attests that every item in each population has been assessed.' },
-                  { id:'ifYesRationale', type:'textarea', label:'If “Yes,” describe the sampling rationale(s) used for selecting sample sizes (for people, process evidence, technologies, devices, locations/sites, etc.).' },
-                  { id:'ifYesRepresent', type:'textarea', label:'Describe how the samples are appropriate and representative of the overall populations.' },
-                  { id:'standardizedControls', type:'radio', label:'Indicate whether standardized processes and controls are in place that provide consistency between each item in the samples—for example, automated system build processes, configuration change detection, etc.', options:['Yes','No'] },
-                  { id:'controlsValidated', type:'textarea', label:'If “Yes,” describe how the processes and controls were validated by the assessor to be in place and effective.' }
+                  { id:'ifNoAssessor', type:'text', label:'If “No,” provide the name of the assessor who attests that every item in each population has been assessed.', when: { fieldId:'samplingUsed', equals:'No' } },
+                  { id:'ifYesHeading', type:'heading', label:'If “Yes,” complete the following:', when: { fieldId:'samplingUsed', equals:'Yes' } },
+                  { id:'ifYesNote', type:'alert', variant:'warning', label:'Note', help:'If multiple sampling methodologies are used, clearly respond for each methodology.', when: { fieldId:'samplingUsed', equals:'Yes' } },
+                  { id:'ifYesRationale', type:'textarea', label:'If “Yes,” describe the sampling rationale(s) used for selecting sample sizes (for people, process evidence, technologies, devices, locations/sites, etc.).', when: { fieldId:'samplingUsed', equals:'Yes' } },
+                  { id:'ifYesRepresent', type:'textarea', label:'Describe how the samples are appropriate and representative of the overall populations.', when: { fieldId:'samplingUsed', equals:'Yes' } },
+                  { id:'standardizedControls', type:'radio', label:'Indicate whether standardized processes and controls are in place that provide consistency between each item in the samples—for example, automated system build processes, configuration change detection, etc.', options:['Yes','No'], when: { fieldId:'samplingUsed', equals:'Yes' } },
+                  { id:'controlsValidated', type:'textarea', label:'If “Yes,” describe how the processes and controls were validated by the assessor to be in place and effective.', when: { fieldId:'standardizedControls', equals:'Yes' } }
                 ]
               },
               {
