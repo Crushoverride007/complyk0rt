@@ -1,0 +1,30 @@
+ ⚠ Port 3000 is in use by an unknown process, using available port 3003 instead.
+   ▲ Next.js 15.5.3
+   - Local:        http://localhost:3003
+   - Network:      http://95.217.190.154:3003
+   - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Ready in 4.2s
+ ○ Compiling / ...
+ ✓ Compiled / in 21.3s (651 modules)
+ GET / 200 in 22732ms
+ ✓ Compiled in 2.2s (251 modules)
+ ✓ Compiled in 1982ms (237 modules)
+ ✓ Compiled in 591ms (237 modules)
+ ✓ Compiled in 3.6s (251 modules)
+ ✓ Compiled in 1332ms (251 modules)
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, rename '/root/complykort/frontend/.next/cache/webpack/client-development/0.pack.gz_' -> '/root/complykort/frontend/.next/cache/webpack/client-development/0.pack.gz'
+ ○ Compiling / ...
+ ✓ Compiled / in 1165ms (400 modules)
+ HEAD / 200 in 1946ms
+ ✓ Compiled in 2.9s (251 modules)
+ ✓ Compiled in 2.8s (251 modules)
+ ✓ Compiled in 1645ms (251 modules)
+ ✓ Compiled in 1472ms (251 modules)
+ ✓ Compiled in 1910ms (251 modules)
+ ✓ Compiled in 3.4s (251 modules)
+ ✓ Compiled in 3.4s (251 modules)
+ ✓ Compiled in 1859ms (251 modules)
+ ✓ Compiled in 1138ms (251 modules)
+[?25h

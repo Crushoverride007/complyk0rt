@@ -1,0 +1,78 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: complykort_dev
+      POSTGRES_USER: complykort
+      POSTGRES_PASSWORD: complykort_password
+    ports:
+      - "127.0.0.1:5432:5432"  # Only accessible from localhost for security
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U complykort -d complykort_dev"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Backend API - accessible from external IPs
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://complykort:complykort_password@postgres:5432/complykort_dev?schema=public
+      - JWT_SECRET=your-super-secret-jwt-key-min-32-characters-dev-external
+      - JWT_REFRESH_SECRET=your-super-secret-refresh-key-min-32-characters-dev-external
+      - FRONTEND_URL=http://95.217.190.154:3000
+      - API_BASE_URL=http://95.217.190.154:3001
+      - ALLOWED_ORIGINS=http://95.217.190.154:3000,http://localhost:3000
+    ports:
+      - "0.0.0.0:3001:3001"  # Accessible from all IPs
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: npm run dev
+
+  # Frontend Next.js - accessible from external IPs
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=development
+      - NEXT_PUBLIC_API_URL=http://95.217.190.154:3001
+      - NEXT_PUBLIC_APP_NAME=ComplykOrt
+      - HOSTNAME=0.0.0.0
+    ports:
+      - "0.0.0.0:3000:3000"  # Accessible from all IPs
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    command: npm run dev
+
+  # Redis for caching (localhost only)
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:6379:6379"  # Only accessible from localhost
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+
+volumes:
+  postgres_data:
+  redis_data:

@@ -1,0 +1,17 @@
+
+> complykort-frontend@1.0.0 dev
+> next dev
+
+   ▲ Next.js 15.5.3
+   - Local:        http://localhost:3010
+   - Network:      http://95.217.190.154:3010
+   - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Ready in 3.9s
+ ○ Compiling / ...
+ ✓ Compiled / in 9.3s (651 modules)
+ GET / 200 in 10684ms
+ ✓ Compiled in 2s (251 modules)
+ GET / 200 in 300ms
+[?25h

@@ -1,0 +1,37 @@
+            number: 3,
+            heading: 'Description of Scope of Work and Approach Taken',
+            items: [
+              { id: '3.1', number: '3.1', label: 'Assessor’s Validation of Defined Scope Accuracy', fields: [
+                { id:'scopeValidation', type:'form-table', label:'Assessor’s Validation of Defined Scope Accuracy', help:'Describe how the assessor validated the accuracy of the defined PCI DSS scope for the assessment.', rows: [
+                  { id:'diffFrom12_5', type:'textarea', label:"Describe how the assessor's evaluation of scope differs from the assessed entity's evaluation of scope as documented in Requirement 12.5. If no difference was identified, mark as 'Not Applicable.'" },
+                  { id:'assessorAttestor', type:'textarea', label:'Provide the name of the assessor who attests that: They have performed an independent evaluation of the scope of the assessed entity’s PCI DSS environment; if the assessor\'s evaluation identified areas of scope not included in the assessed entity\'s documented scope, the assessed entity has updated their scoping documentation; the scope of the assessment is complete and accurate to the best of the assessor’s knowledge.' },
+                  { id:'exclusions', type:'textarea', label:"Describe any business functions, locations, payment channels, or other areas of scope that were excluded from the assessment including the following: What was excluded; Why it was excluded; If it was included in a separate assessment. If none, mark as 'Not Applicable.'" },
+                  { id:'scopeReduction', type:'textarea', label:'Identify any factors that resulted in reducing or limiting scope (for example, segmentation of the environment, use of a P2PE solution, etc.). If none, mark as “Not Applicable.”' },
+                  { id:'saqEligibility', type:'textarea', label:'Describe any use of SAQ eligibility criteria in determining applicability of PCI DSS requirements for this assessment, including the following: The type of SAQ applied; The eligibility criteria for the applicable SAQ; How the assessor verified that the assessed entity’s environment meets the eligibility criteria. If not used, mark as “Not Applicable.”' },
+                  { id:'additionalInfo', type:'textarea', label:'Additional information, if applicable' }
+                ] }
+              ] },
+              { id: '3.2', number: '3.2', label: 'Segmentation', fields: [
+                { id:'segmentationUsed', type:'radio', label:'Indicate whether the assessed entity has used segmentation to reduce the scope of the assessment', options:['Yes','No'] },
+                { id:'segmentationDetails', type:'form-table', label:'Segmentation details', rows: [
+                  { id:'ifNoAttestor', type:'text', label:'If “No”, provide the name of the assessor who attests that the entire network has been included in the scope of the assessment.' },
+                  { id:'descImplementation', type:'textarea', label:'If “Yes”, describe how the segmentation is implemented, including the technologies and processes used.' },
+                  { id:'outOfScopeEnvs', type:'textarea', label:'If “Yes”, describe the environments that were confirmed to be out of scope as a result of the segmentation methods.' },
+                  { id:'yesAttestor', type:'text', label:'If “Yes”, provide the name of the assessor who attests that the segmentation was verified to be adequate to reduce the scope of the assessment and that the technologies/processes used to implement segmentation were included in this PCI DSS assessment.' }
+                ] }
+              ] },
+              { id: '3.3', number: '3.3', label: 'PCI SSC Validated Products and Solutions', fields: [
+                { id:'usesValidatedProducts', type:'radio', label:'Indicate whether the assessed entity uses one or more PCI SSC validated products or solutions', options:['Yes','No'] },
+                { id:'validatedProducts', type:'table-list', label:'If “Yes,” provide the following regarding items the organization uses from PCI SSC’s Lists of Validated Products and Solutions', minRows:5, columns: [
+                  { id:'name', label:'Name of PCI SSC validated product or solution' },
+                  { id:'version', label:'Version of product or solution' },
+                  { id:'standard', label:'PCI SSC Standard to which product or solution was validated' },
+                  { id:'listingRef', label:'PCI SSC listing reference number' },
+                  { id:'expiryDate', label:'Expiry date of listing', type:'date' }
+                ] },
+                { id:'validatedAssessorAttestor', type:'form-table', label:'Attestations and comments', rows: [
+                  { id:'manualAttestor', type:'textarea', label:'Provide the name of the assessor who attests that they have read the instruction manual associated with each of the solution(s) listed above and confirmed that the merchant has implemented the solution per the instructions and detail in the instruction manual.' },
+                  { id:'additionalComments', type:'textarea', label:'Any additional comments or findings the assessor would like to include, if applicable.' }
+                ] }
+              ] }
+            ],

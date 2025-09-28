@@ -1,0 +1,18 @@
+
+> complykort-frontend@1.0.0 dev
+> next dev
+
+ ⚠ Port 3000 is in use by an unknown process, using available port 3001 instead.
+   ▲ Next.js 15.5.3
+   - Local:        http://localhost:3001
+   - Network:      http://95.217.190.Node.js[2034809]: ../src/node.cc:701:void node::ResetStdio(): Assertion `!(err != 0) || (err == -1 && (*__errno_location ()) == 1)' failed.
+ 1: 0xb9bbf0 node::Abort() [next-server (v15.5.3)]
+ 2: 0xb9bc6e  [next-server (v15.5.3)]
+ 3: 0xb53b24  [next-server (v15.5.3)]
+ 4: 0x73caafa47a76  [/lib/x86_64-linux-gnu/libc.so.6]
+ 5: 0x73caafa47bbe  [/lib/x86_64-linux-gnu/libc.so.6]
+ 6: 0xade0b7 node::DefaultProcessExitHandler(node::Environment*, int) [next-server (v15.5.3)]
+ 7: 0xb219f3 node::Environment::Exit(int) [next-server (v15.5.3)]
+ 8: 0xdd1400  [next-server (v15.5.3)]
+ 9: 0xdd293f v8::internal::Builtin_HandleApiCall(int, unsigned long*, v8::internal::Isolate*) [next-server (v15.5.3)]
+10: 0x1711db9  [next-server (v15.5.3)]

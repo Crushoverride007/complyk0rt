@@ -1,0 +1,17 @@
+
+> complykort-backend@1.0.0 dev
+> tsx watch src/server.ts
+
+/root/complykort/backend/src/server.ts:113
+  logger.info(`ComplykOrt API server running on ${host}:${port}`)
+         ^
+
+
+TypeError: Cannot read properties of undefined (reading 'info')
+    at Server.<anonymous> (/root/complykort/backend/src/server.ts:113:10)
+    at Object.onceWrapper (node:events:631:28)
+    at Server.emit (node:events:529:35)
+    at emitListeningNT (node:net:1851:10)
+    at process.processTicksAndRejections (node:internal/process/task_queues:81:21)
+
+Node.js v18.20.8

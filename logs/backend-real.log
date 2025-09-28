@@ -1,0 +1,9 @@
+
+> complykort-backend@1.0.0 dev:real
+> tsx watch src/server-real.ts
+
+🚀 ComplykOrt API server running on 0.0.0.0:3001
+📍 External access: http://95.217.190.154:3001
+🎯 Environment: development
+💾 Database: Connected to PostgreSQL
+🔑 Demo credentials: admin@acme.example.com / demo123!

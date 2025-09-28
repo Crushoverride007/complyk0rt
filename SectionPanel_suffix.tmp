@@ -1,0 +1,66 @@
+) : f.type === 'radio' && Array.isArray(f.options) ? (
+              <div className="space-y-2">
+                {f.options.map(opt => {
+                  const checked = (form[f.id] ?? '') === opt;
+                  return (
+                    <label
+                      key={opt}
+                      className={
+                        `flex items-start gap-3 rounded-md border p-3 cursor-pointer transition-colors ` +
+                        (checked
+                          ? 'bg-[hsl(var(--primary)/0.08)] border-[hsl(var(--primary))]'
+                          : 'bg-card hover:bg-[hsl(var(--foreground)/0.03)] border')
+                      }
+                    >
+                      <input
+                        type="radio"
+                        name={f.id}
+                        value={opt}
+                        checked={checked}
+                        onChange={(e)=> { if (!canWrite) return; const v = e.currentTarget.value; setForm(prev=>({ ...prev, [f.id]: v })); }}
+                        className="mt-1 h-4 w-4 accent-[hsl(var(--primary))]"
+                        disabled={!canWrite}
+                      />
+                      <div>
+                        <div className={`text-sm font-medium ${checked ? 'text-[hsl(var(--primary))]' : 'text-card-foreground'}`}>{opt}</div>
+                        {/* Optional secondary text support: include a pipe to split: "Label | description" */}
+                        {String(opt).includes(' | ') && (
+                          <div className="text-xs text-muted-foreground">{String(opt).split(' | ').slice(1).join(' | ')}</div>
+                        )}
+                      </div>
+                    </label>
+                  );
+                })}
+              </div>
+            ) : (
+              <input
+                type="text"
+                value={form[f.id] ?? ''}
+                onChange={(e)=> { if (!canWrite) return; const v = e.currentTarget.value; setForm(prev=>({ ...prev, [f.id]: v })); }}
+                className="w-full px-3 py-2 rounded bg-card border text-card-foreground placeholder-muted-foreground focus:ring-2 focus:ring-primary/20 focus:border-input"
+                placeholder={`Enter ${typeof f.label === "string" ? f.label : ""}`}
+              disabled={!canWrite}
+              />
+            )}
+          </div>
+          );
+        })}
+      </div>
+
+      {/* Attachments callout */}
+      <div className="mt-6 rounded-md border bg-card/60 p-4" role="note" aria-label="Attachments">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <div className="text-sm font-medium text-card-foreground">Manage attachments for this section</div>
+            <div className="text-xs text-muted-foreground">Upload files and link or unlink them to this section.</div>
+          </div>
+          <a className="inline-flex items-center justify-center h-9 px-3 rounded-md bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] hover:bg-[hsl(var(--primary)/0.9)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[hsl(var(--primary))]" href={`?tab=attachments&sub=${encodeURIComponent(subsectionId)}`}>Open attachments</a>
+        </div>
+      </div>
+      <div className="flex justify-end mt-6 gap-2">
+        <button onClick={onClear} disabled={!canWrite} className="px-4 py-2 disabled:opacity-50 disabled:cursor-not-allowed rounded-md border bg-card hover:bg-[hsl(var(--foreground)/0.06)] text-card-foreground" title="Clear all answers in this section" aria-label="Clear all answers">Clear all</button>
+        <button onClick={onSave} disabled={!canWrite} className="px-4 py-2 disabled:opacity-50 disabled:cursor-not-allowed rounded-md border bg-[hsl(var(--success))] hover:bg-[hsl(var(--success)/0.9)] text-[hsl(var(--success-foreground))]" title="Save answers" aria-label="Save answers">Save</button>
+      </div>
+    </div>
+  );
+}

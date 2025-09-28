@@ -1,0 +1,31 @@
+{
+  "id": "conv-2025-09-25T17-55-30Z",
+  "created_at": "2025-09-25T17:55:30Z",
+  "title": "New conversation from terminal",
+  "environment_snapshots": [
+    {
+      "at": "2025-09-25T17:52:37Z",
+      "directory_state": {"pwd": "/root/complykort", "home": "/root"},
+      "operating_system": {"platform": "Linux", "distribution": "Ubuntu"},
+      "shell": {"name": "bash", "version": "5.2.21(1)-release"}
+    },
+    {
+      "at": "2025-09-25T17:55:30Z",
+      "directory_state": {"pwd": "/root/complykort", "home": "/root"},
+      "operating_system": {"platform": "Linux", "distribution": "Ubuntu"},
+      "shell": {"name": "bash", "version": "5.2.21(1)-release"}
+    }
+  ],
+  "transcript": [
+    {
+      "at": "2025-09-25T17:52:37Z",
+      "role": "user",
+      "content": "create a new conversation and add the context of this conversation to it"
+    },
+    {
+      "at": "2025-09-25T17:55:30Z",
+      "role": "user",
+      "content": "i will get super angry holy fucking god"
+    }
+  ]
+}

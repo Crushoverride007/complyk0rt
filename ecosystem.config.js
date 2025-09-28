@@ -1,0 +1,34 @@
+module.exports = {
+  apps: [
+    {
+      name: "complykort-backend",
+      cwd: "/root/complykort/backend",
+      script: "npm",
+      args: "run dev:real",
+      env: {
+        NODE_ENV: "development",
+        PORT: "3001",
+        HOST: "0.0.0.0"
+      },
+      watch: false,
+      autorestart: true,
+      max_restarts: 10,
+      restart_delay: 5000
+    },
+    {
+      name: "complykort-frontend",
+      cwd: "/root/complykort/frontend",
+      script: "npm",
+      args: "run dev",
+      env: {
+        NODE_ENV: "development",
+        NEXT_PUBLIC_API_URL: "http://95.217.190.154:3001",
+        PORT: "3000"
+      },
+      watch: false,
+      autorestart: true,
+      max_restarts: 10,
+      restart_delay: 5000
+    }
+  ]
+}

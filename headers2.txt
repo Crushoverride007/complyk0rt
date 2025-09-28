@@ -1,0 +1,12 @@
+HTTP/1.1 200 OK
+X-Powered-By: Express
+Permissions-Policy: camera=(), microphone=(), geolocation=()
+Access-Control-Allow-Origin: *
+Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document
+Content-Disposition: attachment; filename="A-001-Main.docx"
+Content-Length: 11845166
+ETag: W/"b4be2e-eghlBwyjIzr2q01rNi4tRVNfK8E"
+Date: Fri, 26 Sep 2025 16:49:02 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+

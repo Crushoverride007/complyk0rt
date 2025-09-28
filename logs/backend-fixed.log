@@ -1,0 +1,58 @@
+🚀 FRESH Backend running on http://0.0.0.0:3001
+🔍 Health: http://95.217.190.154:3001/health
+🔐 Login: admin@acme.example.com / demo123!
+Deprecated method ".setData", view upgrade guide : https://docxtemplater.com/docs/api/#upgrade-guide, stack : Error
+    at deprecatedMethod (/root/complykort/backend/node_modules/docxtemplater/js/docxtemplater.js:183:167)
+    at Docxtemplater.setData (/root/complykort/backend/node_modules/docxtemplater/js/docxtemplater.js:670:7)
+    at /root/complykort/backend/simple-fresh-backend.js:501:11
+    at Layer.handle [as handle_request] (/root/complykort/backend/node_modules/express/lib/router/layer.js:95:5)
+    at next (/root/complykort/backend/node_modules/express/lib/router/route.js:149:13)
+    at Route.dispatch (/root/complykort/backend/node_modules/express/lib/router/route.js:119:3)
+    at Layer.handle [as handle_request] (/root/complykort/backend/node_modules/express/lib/router/layer.js:95:5)
+    at /root/complykort/backend/node_modules/express/lib/router/index.js:284:15
+    at param (/root/complykort/backend/node_modules/express/lib/router/index.js:365:14)
+    at param (/root/complykort/backend/node_modules/express/lib/router/index.js:376:14)
+Deprecated method ".setData", view upgrade guide : https://docxtemplater.com/docs/api/#upgrade-guide, stack : Error
+    at deprecatedMethod (/root/complykort/backend/node_modules/docxtemplater/js/docxtemplater.js:183:167)
+    at Docxtemplater.setData (/root/complykort/backend/node_modules/docxtemplater/js/docxtemplater.js:670:7)
+    at /root/complykort/backend/simple-fresh-backend.js:501:11
+    at Layer.handle [as handle_request] (/root/complykort/backend/node_modules/express/lib/router/layer.js:95:5)
+    at next (/root/complykort/backend/node_modules/express/lib/router/route.js:149:13)
+    at Route.dispatch (/root/complykort/backend/node_modules/express/lib/router/route.js:119:3)
+    at Layer.handle [as handle_request] (/root/complykort/backend/node_modules/express/lib/router/layer.js:95:5)
+    at /root/complykort/backend/node_modules/express/lib/router/index.js:284:15
+    at param (/root/complykort/backend/node_modules/express/lib/router/index.js:365:14)
+    at param (/root/complykort/backend/node_modules/express/lib/router/index.js:376:14)
+Deprecated method ".setData", view upgrade guide : https://docxtemplater.com/docs/api/#upgrade-guide, stack : Error
+    at deprecatedMethod (/root/complykort/backend/node_modules/docxtemplater/js/docxtemplater.js:183:167)
+    at Docxtemplater.setData (/root/complykort/backend/node_modules/docxtemplater/js/docxtemplater.js:670:7)
+    at /root/complykort/backend/simple-fresh-backend.js:501:11
+    at Layer.handle [as handle_request] (/root/complykort/backend/node_modules/express/lib/router/layer.js:95:5)
+    at next (/root/complykort/backend/node_modules/express/lib/router/route.js:149:13)
+    at Route.dispatch (/root/complykort/backend/node_modules/express/lib/router/route.js:119:3)
+    at Layer.handle [as handle_request] (/root/complykort/backend/node_modules/express/lib/router/layer.js:95:5)
+    at /root/complykort/backend/node_modules/express/lib/router/index.js:284:15
+    at param (/root/complykort/backend/node_modules/express/lib/router/index.js:365:14)
+    at param (/root/complykort/backend/node_modules/express/lib/router/index.js:376:14)
+Deprecated method ".setData", view upgrade guide : https://docxtemplater.com/docs/api/#upgrade-guide, stack : Error
+    at deprecatedMethod (/root/complykort/backend/node_modules/docxtemplater/js/docxtemplater.js:183:167)
+    at Docxtemplater.setData (/root/complykort/backend/node_modules/docxtemplater/js/docxtemplater.js:670:7)
+    at /root/complykort/backend/simple-fresh-backend.js:501:11
+    at Layer.handle [as handle_request] (/root/complykort/backend/node_modules/express/lib/router/layer.js:95:5)
+    at next (/root/complykort/backend/node_modules/express/lib/router/route.js:149:13)
+    at Route.dispatch (/root/complykort/backend/node_modules/express/lib/router/route.js:119:3)
+    at Layer.handle [as handle_request] (/root/complykort/backend/node_modules/express/lib/router/layer.js:95:5)
+    at /root/complykort/backend/node_modules/express/lib/router/index.js:284:15
+    at param (/root/complykort/backend/node_modules/express/lib/router/index.js:365:14)
+    at param (/root/complykort/backend/node_modules/express/lib/router/index.js:376:14)
+Deprecated method ".setData", view upgrade guide : https://docxtemplater.com/docs/api/#upgrade-guide, stack : Error
+    at deprecatedMethod (/root/complykort/backend/node_modules/docxtemplater/js/docxtemplater.js:183:167)
+    at Docxtemplater.setData (/root/complykort/backend/node_modules/docxtemplater/js/docxtemplater.js:670:7)
+    at /root/complykort/backend/simple-fresh-backend.js:501:11
+    at Layer.handle [as handle_request] (/root/complykort/backend/node_modules/express/lib/router/layer.js:95:5)
+    at next (/root/complykort/backend/node_modules/express/lib/router/route.js:149:13)
+    at Route.dispatch (/root/complykort/backend/node_modules/express/lib/router/route.js:119:3)
+    at Layer.handle [as handle_request] (/root/complykort/backend/node_modules/express/lib/router/layer.js:95:5)
+    at /root/complykort/backend/node_modules/express/lib/router/index.js:284:15
+    at param (/root/complykort/backend/node_modules/express/lib/router/index.js:365:14)
+    at param (/root/complykort/backend/node_modules/express/lib/router/index.js:376:14)
