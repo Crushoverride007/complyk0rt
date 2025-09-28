@@ -470,13 +470,11 @@ export const frameworkStructures: Record<string, any> = {
                 label: 'Sampling',
                 fields: [
                   { id:'samplingUsed', type:'radio', label:'Indicate whether sampling is used.', options:['Yes','No'] },
-                  { id:'ifNoAssessor', type:'text', label:'If “No,” provide the name of the assessor who attests that every item in each population has been assessed.', when: { fieldId:'samplingUsed', equals:'No' } },
-                  { id:'ifYesHeading', type:'heading', label:'If “Yes,” complete the following:', when: { fieldId:'samplingUsed', equals:'Yes' } },
-                  { id:'ifYesNote', type:'alert', variant:'warning', label:'Note', help:'If multiple sampling methodologies are used, clearly respond for each methodology.', when: { fieldId:'samplingUsed', equals:'Yes' } },
-                  { id:'ifYesRationale', type:'textarea', label:'If “Yes,” describe the sampling rationale(s) used for selecting sample sizes (for people, process evidence, technologies, devices, locations/sites, etc.).', when: { fieldId:'samplingUsed', equals:'Yes' } },
-                  { id:'ifYesRepresent', type:'textarea', label:'Describe how the samples are appropriate and representative of the overall populations.', when: { fieldId:'samplingUsed', equals:'Yes' } },
-                  { id:'standardizedControls', type:'radio', label:'Indicate whether standardized processes and controls are in place that provide consistency between each item in the samples—for example, automated system build processes, configuration change detection, etc.', options:['Yes','No'], when: { fieldId:'samplingUsed', equals:'Yes' } },
-                  { id:'controlsValidated', type:'textarea', label:'If “Yes,” describe how the processes and controls were validated by the assessor to be in place and effective.', when: { fieldId:'standardizedControls', equals:'Yes' } }
+                  { id:'ifNoAssessor', type:'text', label:'If “No,” provide the name of the assessor who attests that every item in each population has been assessed.' },
+                  { id:'ifYesRationale', type:'textarea', label:'If “Yes,” describe the sampling rationale(s) used for selecting sample sizes (for people, process evidence, technologies, devices, locations/sites, etc.).' },
+                  { id:'ifYesRepresent', type:'textarea', label:'Describe how the samples are appropriate and representative of the overall populations.' },
+                  { id:'standardizedControls', type:'radio', label:'Indicate whether standardized processes and controls are in place that provide consistency between each item in the samples—for example, automated system build processes, configuration change detection, etc.', options:['Yes','No'] },
+                  { id:'controlsValidated', type:'textarea', label:'If “Yes,” describe how the processes and controls were validated by the assessor to be in place and effective.' }
                 ]
               },
               {
@@ -484,24 +482,16 @@ export const frameworkStructures: Record<string, any> = {
                 number: '6.3',
                 label: 'Sample Sets for Reporting',
                 fields: [
-                  { id:'s63Instr', type:'alert', variant:'info', label:'Instructions', help:'Identify all sample sets used during testing. This table only needs to be completed for populations where sampling was used.
-
-When sampling is used the assessor must identify the items in the population that were tested (for example, as “Sample Set-1”) as part of the sample in the table below. All unique sample sets must be documented in this table.' },
-                  { id:'s63Note', type:'alert', variant:'warning', label:'Note', help:'For items where the total population fluctuates or is difficult to determine, the assessor may work with the assessed entity to provide an estimated total population in the Total Population column below.' },
                   {
                     id:'sampleSets',
                     type:'table-list',
-                    label:'Sample sets used during testing',
-                    help:'1 For example, firewalls, datacenters, change records, User IDs, and so on.
-2 For example, unique system identifiers, location addresses/identifiers, change record numbers/identifiers, personnel identifier, and so on.
-3 Describe the method for selecting individual items in the sample sets.',
-                    helpPosition:'below',
-                    minRows: 5,
+                    label:'Identify all sample sets used during testing. If sampling is used the assessor must identify the items in the population that were tested (for example, as “Sample Set-1”).',
+                    minRows: 3,
                     columns: [
                       { id:'refNum', label:'Tested Sample Set Reference Number', width:'16%' },
-                      { id:'sampleType', label:'Sample Type/ Description¹', width:'22%' },
-                      { id:'identifyItems', label:'Identify All Items in the Sample Set²', width:'28%' },
-                      { id:'selectionMethod', label:'Selection Method³', width:'18%' },
+                      { id:'sampleType', label:'Sample Type/ Description', width:'22%' },
+                      { id:'identifyItems', label:'Identify All Items in the Sample Set', width:'28%' },
+                      { id:'selectionMethod', label:'Selection Method', width:'18%' },
                       { id:'totalSampled', label:'Total Sampled', type:'number', width:'8%' },
                       { id:'totalPopulation', label:'Total Population', type:'number', width:'8%' }
                     ]

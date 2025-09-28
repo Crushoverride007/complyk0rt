@@ -31,7 +31,6 @@ const nextConfig = {
     'http://localhost:3000',
     'http://127.0.0.1:3000',
     'http://95.217.190.154:3000',
-    'https://95.217.190.154',
     "https://kortlabs.xyz",
     "https://www.kortlabs.xyz",
       ],
