@@ -411,7 +411,22 @@ const frameworkStructures = {
             items: [
               { id: '6.1', number: '6.1', label: 'Sampling approach' },
               { id: '6.2', number: '6.2', label: 'Evidence collected' },
-              { id: '6.3', number: '6.3', label: 'Sampled entities' },
+              { id: '6.3', number: '6.3', label: 'Sample Sets for Reporting', fields: [
+  { id:'s63Instr', type:'alert', variant:'info', label:'Instructions', help:'Identify all sample sets used during testing. This table only needs to be completed for populations where sampling was used.
+
+When sampling is used the assessor must identify the items in the population that were tested (for example, as “Sample Set-1”) as part of the sample in the table below. All unique sample sets must be documented in this table.' },
+  { id:'s63Note', type:'alert', variant:'warning', label:'Note', help:'For items where the total population fluctuates or is difficult to determine, the assessor may work with the assessed entity to provide an estimated total population in the Total Population column below.' },
+  { id:'sampleSets', type:'table-list', label:'Sample sets used during testing', help:'1 For example, firewalls, datacenters, change records, User IDs, and so on.
+2 For example, unique system identifiers, location addresses/identifiers, change record numbers/identifiers, personnel identifier, and so on.
+3 Describe the method for selecting individual items in the sample sets.', helpPosition:'below', minRows:5, columns:[
+    { id:'refNum', label:'Tested Sample Set Reference Number', width:'16%' },
+    { id:'sampleType', label:'Sample Type/ Description¹', width:'22%' },
+    { id:'identifyItems', label:'Identify All Items in the Sample Set²', width:'28%' },
+    { id:'selectionMethod', label:'Selection Method³', width:'18%' },
+    { id:'totalSampled', label:'Total Sampled', type:'number', width:'8%' },
+    { id:'totalPopulation', label:'Total Population', type:'number', width:'8%' }
+  ] }
+]},
               { id: '6.4', number: '6.4', label: 'Deviations' },
             ],
           },
